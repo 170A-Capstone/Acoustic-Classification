@@ -36,6 +36,8 @@ class DB():
         return cursor
 
     def connectEngine(self):
+
+        # construct connection string from sql credentials
         cnxn_str = 'postgresql://{user}:{password}@{host}:{port}/{dbname}'
         cnxn_str = cnxn_str.format(host=sql_credentials['host'],
                             dbname=sql_credentials['dbname'],
@@ -44,6 +46,7 @@ class DB():
                             port=sql_credentials['port'],
                             )
 
+        # establish connection
         engine = create_engine(cnxn_str)
 
         return engine
@@ -55,6 +58,7 @@ class DB():
             df (pandas.DataFrame): dataframe containing data to be stored
             table_name (str): name of table display name
         """
+        
         df.to_sql(table_name, con=self.engine, if_exists='replace')
         
         if self.log:
