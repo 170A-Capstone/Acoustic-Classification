@@ -1,43 +1,39 @@
+import torch
 import torch.optim as optim
 import torch.nn as nn
 
-# baseline loss function
-criterion = nn.CrossEntropyLoss()
+class Trainer():
+    def __init__(self,model,lr=0.001, momentum=0.9,log = False) -> None:
+        
+        self.log = log
+        self.model = model
 
-def training_loop(model_package,lambda_reg,inputs,labels) -> "loss":
-    """Runs a single training loop for a single model
+        # baseline loss function
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
-    Args:
-        model_package (list(dict)): list of dictionaries containing necessary elements of regularizers for training
-        lambda_reg (float): modulation value to scale the impact of regularization terms
-        inputs (torch.Tensor): data to be predicted upon
-        labels (torch.Tensor): actual outputs
+        if self.log:
+            print('[Trainer]: Trainer initialized')
 
-    Returns:
-        loss (float): loss value
-    """
+    def training_loop(self,inputs,labels) -> "loss":
 
-    model = model_package["model"]
-    regularizer_func = model_package["regularizer_func"]
-    optimizer = model_package["optimizer"]
+        inputs = torch.Tensor(inputs)
+        labels = torch.Tensor(labels)
 
-    # zero the parameter gradients
-    optimizer.zero_grad()
+        # zero the parameter gradients
+        self.optimizer.zero_grad()
 
-    # forward pass
-    outputs = model(inputs)
+        # forward pass
+        outputs = self.model(inputs)
 
-    # calculate regularization values for all nodes
-    regularization_values = [regularizer_func(params) for type, params in model.named_parameters() if type.endswith('weight')]
-    
-    # calculate baseline loss + modulated regularization value
-    loss = criterion(outputs, labels) + lambda_reg * sum(regularization_values)
+        # calculate baseline loss + modulated regularization value
+        loss = self.criterion(outputs, labels)
 
-    # calculate gradients with respect to loss
-    loss.backward()
+        # calculate gradients with respect to loss
+        loss.backward()
 
-    # apply gradients to parameters
-    optimizer.step()
+        # apply gradients to parameters
+        self.optimizer.step()
 
-    # return loss value for analysis
-    return loss.item()
+        # return loss value for analysis
+        return loss.item()

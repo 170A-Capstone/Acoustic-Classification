@@ -2,6 +2,10 @@ import os, sys, torch
 
 from utils.file_utils import *
 from utils.training_utils import Trainer
+from model import Net
+
+import utils.preprocessing_utils as preproc
+from utils.data_utils import IDMT
 
 def main(lambda_reg,test_label):
     """Train models on four significant regularizers—the last of which is novel—on CIFAR-10 dataset and store model parameters in training context directory inside ./models/ folder
@@ -56,9 +60,8 @@ def main(lambda_reg,test_label):
 
         torch.save(model_parameters, model_path)
 
-if __name__ == '__main__':
-
-    if len(sys.argv) != 3:
+def readArguments(args):
+    if len(args) != 3:
         print("Usage: python train_models.py <test label> <lambda reg>")
         raise SyntaxError
     else:
@@ -75,4 +78,30 @@ if __name__ == '__main__':
     if check_folder_exists(folder_path):
         raise FileExistsError
     
-    main(lambda_reg,test_label)
+    return lambda_reg,test_label
+
+import numpy as np
+
+def main2():
+    net = Net(log=True)
+    trainer = Trainer(net,log=True)
+
+    idmt = IDMT(log=True,compression_factor=None)
+    paths = idmt.getFilePaths()
+
+    index = 2
+    path = paths[index]
+    audio = idmt.extractAudio(path)
+    label_embedding = idmt.extractLabelEmbedding(path)
+
+    fft,compressed_fft = preproc.process(audio)
+
+    loss = trainer.training_loop(compressed_fft,label_embedding)
+    print(loss)
+
+if __name__ == '__main__':
+
+    # lambda_reg,test_label = readArguments(sys.argv)
+    # main(lambda_reg,test_label)
+
+    main2()

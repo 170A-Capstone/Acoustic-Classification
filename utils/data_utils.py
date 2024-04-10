@@ -8,11 +8,17 @@ class IDMT():
     """
 
     def __init__(self,log=False,compression_factor=100,directory_path = "./IDMT_Traffic/audio/") -> None:
-        self.columns = ['date','location','speed','position','daytime','weather','class','source direction','mic','channel']
         
+        self.columns = ['date','location','speed','position','daytime','weather','class','source direction','mic','channel']
+        self.classes = ['B', 'C', 'M', 'T']
+
         self.log = log
         self.compression_factor = compression_factor
         self.directory_path = directory_path
+
+        if self.log:
+            print('[IDMT]: IDMT Dataset Handler initialized')
+        
 
     def getFilePaths(self):
         paths = os.listdir(self.directory_path)
@@ -63,6 +69,7 @@ class IDMT():
         root_path = self.directory_path + relative_path
         return preproc.extractAudio(root_path,left=True,compression_factor=self.compression_factor)
     
+    # rename getAudioDF to comply with getFeatureDF naming convention
     def extractAudioDF(self,paths):
         audio_data = [self.extractAudio(path) for path in paths]
         df = pd.DataFrame(audio_data)
@@ -71,6 +78,12 @@ class IDMT():
             print('[IDMT]: Audio Extracted')
 
         return df
+    
+    def extractLabelEmbedding(self,path):
+        features = self.extractFeatures(path)
+        label = features[self.columns.index('class')]
+        embedding = [1 if class_ == label else 0 for class_ in self.classes]
+        return embedding
 
 class MVD():
     def __init__(self) -> None:
