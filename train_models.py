@@ -7,45 +7,8 @@ from model import Net
 import utils.preprocessing_utils as preproc
 from utils.data_utils import IDMT
 
-def main(lambda_reg,test_label):
-    """Train models on four significant regularizers—the last of which is novel—on CIFAR-10 dataset and store model parameters in training context directory inside ./models/ folder
-
-    Args:
-        lambda_reg (float): modulation value to scale the impact of regularization terms
-        test_label (string): name of training context folder that will be created to store trained model parameters
-    """
-
-    loss_output = []
-
-    print('= [Training]')
-    for epoch in range(10):
-
-        print('== [Epoch: %s]' % epoch)
-
-        # time epoch
-        start_time = time.time()
-
-        for i, (inputs,labels) in enumerate(trainloader, 0):
-
-            # limit training time for debugging purposes
-            # if i > 5:
-            #     break
-
-            loss_output_for_epoch = []
-
-            # iterate through all regularizer functions
-            for model_package in model_components:
-
-                # run a single training loop
-                loss = training_loop(model_package,lambda_reg,inputs,labels)
-
-                loss_output_for_epoch.append(loss)
-        
-        loss_output.append(loss_output_for_epoch)
-
-        end_time = time.time()
-        print(end_time - start_time)
-
+def storeParameters():
+    
     # create folder to store loss and model parameters for particular training run
     create_folder(folder_path)
     
@@ -82,26 +45,42 @@ def readArguments(args):
 
 import numpy as np
 
-def main2():
+def main():
     net = Net(log=True)
     trainer = Trainer(net,log=True)
 
     idmt = IDMT(log=True,compression_factor=None)
     paths = idmt.getFilePaths()
 
-    index = 2
-    path = paths[index]
-    audio = idmt.extractAudio(path)
-    label_embedding = idmt.extractLabelEmbedding(path)
+    # construct training dataset
+    trainloader = []
+    for path in paths[:5]:
+        audio = idmt.extractAudio(path)
+        fft,compressed_fft = preproc.process(audio)
 
-    fft,compressed_fft = preproc.process(audio)
+        label_embedding = idmt.extractLabelEmbedding(path)
 
-    loss = trainer.training_loop(compressed_fft,label_embedding)
-    print(loss)
+        trainloader.append((compressed_fft,label_embedding))
+
+    # print(trainloader)
+
+    losses = trainer.training_epoch(epochs=1,trainloader=trainloader)
+
+    print(losses)
+
+    # index = 2
+    # path = paths[index]
+    # audio = idmt.extractAudio(path)
+    # label_embedding = idmt.extractLabelEmbedding(path)
+
+    # fft,compressed_fft = preproc.process(audio)
+
+    # loss = trainer.training_loop(compressed_fft,label_embedding)
+    # print(loss)
 
 if __name__ == '__main__':
 
     # lambda_reg,test_label = readArguments(sys.argv)
     # main(lambda_reg,test_label)
 
-    main2()
+    main()

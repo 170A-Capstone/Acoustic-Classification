@@ -37,3 +37,22 @@ class Trainer():
 
         # return loss value for analysis
         return loss.item()
+    
+    def training_epoch(self,epochs,trainloader):
+        losses = []
+
+        for epoch in range(epochs):
+
+            print(f'[Trainer]: Epoch {epoch}')
+
+            for i, (inputs,labels) in enumerate(trainloader, 0):
+
+                # limit training time for debugging purposes
+                # if i > 5:
+                #     break
+                
+                loss = self.training_loop(inputs,labels)
+            
+                losses.append(loss)
+
+        return losses
