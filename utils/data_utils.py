@@ -85,6 +85,22 @@ class IDMT():
         embedding = [1 if class_ == label else 0 for class_ in self.classes]
         return embedding
 
+    def constructDataLoader(self,paths):
+        # construct training dataset
+        loader = []
+        for path in paths[:10]:
+            audio = self.extractAudio(path)
+            fft,compressed_fft = preproc.process(audio)
+
+            label_embedding = self.extractLabelEmbedding(path)
+
+            loader.append((compressed_fft,label_embedding))
+        
+        if self.log:
+            print('[IDMT]: Data Loader Constructed')
+
+        return loader
+
 class MVD():
     def __init__(self) -> None:
         pass

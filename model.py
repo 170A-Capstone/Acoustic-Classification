@@ -16,6 +16,7 @@ class Net(nn.Module):
 
         if self.log:
             print('[Model]: Model initialized')
+        
 
     def forward(self, x):
         x = self.fc(x)

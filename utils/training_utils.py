@@ -10,10 +10,14 @@ class Trainer():
 
         # baseline loss function
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 
         if self.log:
             print('[Trainer]: Trainer initialized')
+
+        # if self.log:
+        #     print('[Trainer]: Parameter summary:')
+        #     print(summarizeWeights(self.model))
 
     def training_loop(self,inputs,labels) -> "loss":
 
@@ -25,6 +29,7 @@ class Trainer():
 
         # forward pass
         outputs = self.model(inputs)
+        # print(outputs)
 
         # calculate baseline loss + modulated regularization value
         loss = self.criterion(outputs, labels)
@@ -56,3 +61,17 @@ class Trainer():
                 losses.append(loss)
 
         return losses
+    
+def summarize(values):
+    summary = {
+        'mean': sum(values) / len(values),
+        'min': min(values),
+        'max': max(values),
+        'std_dev': (sum((x - (sum(values) / len(values))) ** 2 for x in values) / len(values)) ** 0.5
+    }
+    return summary
+
+def summarizeWeights(model):
+    a = [(name, param) for name, param in model.named_parameters()]
+    b = a[0][1].data.numpy().reshape(-1)
+    return summarize(b)
