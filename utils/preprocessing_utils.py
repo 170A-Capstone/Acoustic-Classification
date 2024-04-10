@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.io import wavfile
 
-
 def compressVector(vector,compression_factor):
     """Compress audio time-series array
 
@@ -47,3 +46,11 @@ def extractAudio(path,left = True,compression_factor = None):
 #         pass
 
     
+def process(audio):
+
+    # https://www.youtube.com/watch?v=aQKX3mrDFoY
+
+    fft = np.fft.fft(audio)
+    fft = np.abs(fft)[0:int(len(audio)/2)]
+    compressed_fft = compressVector(fft,compression_factor=100)
+    return fft,compressed_fft
