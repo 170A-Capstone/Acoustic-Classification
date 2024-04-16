@@ -46,9 +46,13 @@ class Trainer():
     def training_epoch(self,epochs,trainloader):
         losses = []
 
+        if self.log:
+            print(f'[Trainer]: Training on {len(trainloader)} data points')
+
         for epoch in range(epochs):
 
-            print(f'[Trainer]: Epoch {epoch}')
+            if self.log:
+                print(f'[Trainer]: Epoch {epoch}')
 
             for i, (inputs,labels) in enumerate(trainloader, 0):
 
