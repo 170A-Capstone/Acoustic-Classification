@@ -1,8 +1,10 @@
 import psycopg2
+import pymysql
+import mysql.connector
 import pandas as pd
 from sqlalchemy import create_engine
 
-from sql_credentials import sql_credentials
+##import sql_credentials
 
 class DB():
     """Utilities for interfacing with postgreSQL database
@@ -18,6 +20,13 @@ class DB():
             'port':'5433'
         }
 
+        sql_credentials = {
+            'host':'MacBook-Pro-2.local',
+            'dbname':'170',
+            'user':'mysql',
+            'password':'13683819895Rjy',
+            'port':'3306'
+        }
     """
 
     def __init__(self,log = False) -> None:
@@ -27,23 +36,23 @@ class DB():
         self.engine = self.connectEngine()
 
     def connectCursor(self):
-        conn = psycopg2.connect(host=sql_credentials['host'],
-                            dbname=sql_credentials['dbname'],
-                            user=sql_credentials['user'],
-                            password=sql_credentials['password'],
-                            port=5433)
+        conn = mysql.connector.connect(host='localhost',
+                            #database='170',
+                            user='root',
+                            password='13683819895Rjy',
+                            port=3306)
         cursor = conn.cursor()
         return cursor
 
     def connectEngine(self):
 
         # construct connection string from sql credentials
-        cnxn_str = 'postgresql://{user}:{password}@{host}:{port}/{dbname}'
-        cnxn_str = cnxn_str.format(host=sql_credentials['host'],
-                            dbname=sql_credentials['dbname'],
-                            user=sql_credentials['user'],
-                            password=sql_credentials['password'],
-                            port=sql_credentials['port'],
+        cnxn_str = 'mysql+pymysql://root:13683819895Rjy@localhost:3306/project170'
+        cnxn_str = cnxn_str.format(host='localhost',
+                            database='project170',
+                            user='root',
+                            password='13683819895Rjy',
+                            port=3306,
                             )
 
         # establish connection
