@@ -88,7 +88,7 @@ class IDMT():
     def constructDataLoader(self,paths):
         # construct training dataset
         loader = []
-        for path in paths[:10]:
+        for path in paths:
             audio = self.extractAudio(path)
             fft,compressed_fft = preproc.process(audio)
 
@@ -97,9 +97,11 @@ class IDMT():
             loader.append((compressed_fft,label_embedding))
         
         if self.log:
-            print('[IDMT]: Data Loader Constructed')
+            print('[IDMT]: Train Loader Constructed')
 
         return loader
+
+
 
 class MVD():
     def __init__(self) -> None:

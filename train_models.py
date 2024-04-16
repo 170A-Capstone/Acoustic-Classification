@@ -1,11 +1,7 @@
-import os, sys, torch
-
-from utils.file_utils import *
-from utils.training_utils import Trainer
 from model import Net
-
-import utils.preprocessing_utils as preproc
 from utils.data_utils import IDMT
+from utils.training_utils import Trainer
+from utils.evaluation_utils import Evaluator
 
 def main():
     net = Net(log=True)
@@ -17,13 +13,14 @@ def main():
     paths = idmt.getFilePaths()
 
     trainloader = idmt.constructDataLoader(paths[:10])
-    losses = trainer.training_epoch(epochs=2,trainloader=trainloader)
+    losses = trainer.training_epoch(epochs=1,trainloader=trainloader)
 
-    print(losses)
+    # print(losses)
+
+    evaluator = Evaluator(trainer.model)
+    accuracy = evaluator.evaluate(trainloader[:1000])
+    print(f'accuracy: {accuracy}')
 
 if __name__ == '__main__':
-
-    # lambda_reg,test_label = readArguments(sys.argv)
-    # main(lambda_reg,test_label)
 
     main()
