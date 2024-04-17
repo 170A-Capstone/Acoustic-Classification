@@ -23,7 +23,7 @@ class DB():
     def __init__(self,log = False) -> None:
         self.log = log
 
-        self.cursor = self.connectCursor()
+        self.conn,self.cursor = self.connectCursor()
         self.engine = self.connectEngine()
 
     def connectCursor(self):
@@ -33,7 +33,7 @@ class DB():
                             password=sql_credentials['password'],
                             port=5433)
         cursor = conn.cursor()
-        return cursor
+        return conn,cursor
 
     def connectEngine(self):
 
