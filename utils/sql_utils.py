@@ -2,7 +2,7 @@ import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 
-from sql_credentials import sql_credentials
+from .sql_credentials import sql_credentials
 
 class DB():
     """Utilities for interfacing with postgreSQL database
