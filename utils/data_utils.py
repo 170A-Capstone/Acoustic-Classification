@@ -107,7 +107,7 @@ class MVD():
     def __init__(self,log=False,compression_factor=100,directory_path = "/Users/apple/Desktop/MVD/") -> None:
         
         self.columns = ['record_num', 'mic', 'class']
-        self.classes = ['B', 'C', 'M', 'T']
+        self.classes = ['N', 'C', 'M', 'T']
 
         self.log = log
         self.compression_factor = compression_factor
