@@ -31,7 +31,7 @@ class DB():
                             dbname=sql_credentials['dbname'],
                             user=sql_credentials['user'],
                             password=sql_credentials['password'],
-                            port=5433)
+                            port=sql_credentials['port'])
         cursor = conn.cursor()
         return cursor
 
