@@ -82,7 +82,7 @@ class Evaluator:
             for inputs, labels in self.data_loader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 outputs = self.model(inputs)
-                _, predicted = torch.max(outputs.data, 1)
+                _, predicted = torch.max(outputs.data, 0)
                 
                 y_true.extend(labels.tolist())
                 y_pred.extend(predicted.tolist())
