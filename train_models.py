@@ -13,9 +13,9 @@ def main():
     paths = idmt.getFilePaths()
 
     trainloader = idmt.constructDataLoader(paths[:10])
-    losses = trainer.training_epoch(epochs=1,trainloader=trainloader)
+    losses = trainer.training_epoch(epochs=10,trainloader=trainloader)
 
-    # print(losses)
+    print(losses)
 
     evaluator = Evaluator(trainer.model)
     accuracy = evaluator.evaluate(trainloader[:1000])
