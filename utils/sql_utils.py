@@ -89,3 +89,4 @@ class DB():
             return df
         except:
             print(f'[SQL]: ! Unable to download Table "{table_name}" !')
+

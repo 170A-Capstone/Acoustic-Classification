@@ -8,7 +8,7 @@ def main():
     db = DB(log=True)
     idmt = IDMT(log=True)
 
-    paths = idmt.getFilePaths()[:5]
+    paths = idmt.getFilePaths()#[:5]
     feature_df = idmt.getFeatureDF(paths)
 
     db.uploadDF(df=feature_df,table_name='idmt_metadata')
@@ -22,7 +22,7 @@ def main():
     dbMVD = DB(log=True)
     mvd = MVD(log=True)
 
-    pathsmvd = mvd.getFilePaths()[:5]
+    pathsmvd = mvd.getFilePaths()#[:5]
     feature_dfmvd = mvd.getFeatureDF(pathsmvd)
 
     dbMVD.uploadDF(df=feature_dfmvd,table_name='mvd_metadata')

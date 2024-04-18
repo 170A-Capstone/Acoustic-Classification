@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+import psycopg2
 import utils.preprocessing_utils as preproc
 
 class IDMT():
@@ -73,7 +73,8 @@ class IDMT():
     
     # rename getAudioDF to comply with getFeatureDF naming convention
     def extractAudioDF(self,paths):
-        audio_data = [self.extractAudio(path) for path in paths]
+        #Blob storage
+        audio_data = [psycopg2.Binary(self.extractAudio(path)) for path in paths]
         df = pd.DataFrame(audio_data)
         
         if self.log:
@@ -107,7 +108,7 @@ class MVD():
     def __init__(self,log=False,compression_factor=100,directory_path = "/Users/apple/Desktop/MVD/") -> None:
         
         self.columns = ['record_num', 'mic', 'class']
-        self.classes = ['B', 'C', 'M', 'T']
+        self.classes = ['N', 'C', 'M', 'T']
 
         self.log = log
         self.compression_factor = compression_factor
@@ -167,7 +168,8 @@ class MVD():
     
     # rename getAudioDF to comply with getFeatureDF naming convention
     def extractAudioDF(self,paths):
-        audio_data = [self.extractAudio(path) for path in paths]
+        #Blob storage
+        audio_data = [psycopg2.Binary(self.extractAudio(path)) for path in paths]
         df = pd.DataFrame(audio_data)
         
         if self.log:
