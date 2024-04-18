@@ -7,8 +7,10 @@ class IDMT():
     """Utilities for handling IDMT dataset
     """
 
-    def __init__(self,log=False,compression_factor=100,directory_path = "./IDMT_Traffic/audio/") -> None:
+    def __init__(self,log=False,compression_factor=100,directory_path = "/Users/cecima/Desktop/170B-Proj/Acoustic-Classification/IDMT_Traffic/audio/") -> None:
         
+        #what is log and compression_factor here
+
         self.columns = ['date','location','speed','position','daytime','weather','class','source direction','mic','channel']
         self.classes = ['B', 'C', 'M', 'T']
 
@@ -104,5 +106,95 @@ class IDMT():
 
 
 class MVD():
-    def __init__(self) -> None:
-        pass
+    def __init__(self,log=False,compression_factor=100,directory_path = "/Users/cecima/Desktop/170B-Proj/MVD/") -> None:
+        
+        self.columns = ['record_num', 'mic', 'class']
+        self.classes = ['N', 'C', 'M', 'T']
+
+        self.log = log
+        self.compression_factor = compression_factor
+        self.directory_path = directory_path
+
+        if self.log:
+            print('[MVD]: MVD Dataset Handler initialized')
+        
+
+    def getFilePaths(self): #required explaination
+        paths = os.listdir(self.directory_path)
+        non_noise = [path for path in paths if '-BG' not in path]
+        
+        if self.log:
+            print('[MVD]: Paths Acquired')
+        #print(non_noise)
+        return non_noise
+
+    def extractFeatures(self,path):
+        """Extracts known features embedded within file name of dataset instance
+
+        Args:
+            path (str): stringified features
+                example: "Recording_1_H_M.wav"
+
+        Returns:
+            array[str]: itemized features
+                example: ['1', 'H', 'M']
+        """
+
+        features = path[:-4].split('_')
+        features = features[1:]
+
+        return features
+    
+    def getFeatureDF(self,paths):
+        """Packages all features of dataset into dataframe
+
+        Args:
+            paths (array[str]): list of dataset paths
+
+        Returns:
+            pandas.DataFrame: dataframe containing dataset features
+        """
+        
+        features = [self.extractFeatures(path) for path in paths]
+        df = pd.DataFrame(features,columns=self.columns)
+
+        if self.log:
+            print('[MVD]: Features Extracted')
+
+        return df
+
+    def extractAudio(self,relative_path):
+        root_path = self.directory_path + relative_path
+        return preproc.extractAudio(root_path,left=True,compression_factor=self.compression_factor)
+    
+    # rename getAudioDF to comply with getFeatureDF naming convention
+    def extractAudioDF(self,paths):
+        audio_data = [self.extractAudio(path) for path in paths]
+        df = pd.DataFrame(audio_data)
+        
+        if self.log:
+            print('[MVD]: Audio Extracted')
+
+        return df
+    
+    def extractLabelEmbedding(self,path):
+        features = self.extractFeatures(path)
+        label = features[self.columns.index('class')]
+        embedding = [1 if class_ == label else 0 for class_ in self.classes]
+        return embedding
+
+    def constructDataLoader(self,paths):
+        # construct training dataset
+        loader = []
+        for path in paths[:10]:
+            audio = self.extractAudio(path)
+            fft,compressed_fft = preproc.process(audio)
+
+            label_embedding = self.extractLabelEmbedding(path)
+
+            loader.append((compressed_fft,label_embedding))
+        
+        if self.log:
+            print('[MVD]: Data Loader Constructed')
+
+        return loader

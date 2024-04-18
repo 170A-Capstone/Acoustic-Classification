@@ -18,6 +18,13 @@ class DB():
             'port':'5433'
         }
 
+        sql_credentials = {
+            'host':'MacBook-Pro-2.local',
+            'dbname':'170',
+            'user':'mysql',
+            'password':'13683819895Rjy',
+            'port':'3306'
+        }
     """
 
     def __init__(self,log = False) -> None:

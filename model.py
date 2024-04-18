@@ -19,5 +19,6 @@ class Net(nn.Module):
         
 
     def forward(self, x):
+        x = x.float()
         x = self.fc(x)
         return x

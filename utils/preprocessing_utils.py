@@ -34,7 +34,12 @@ def extractAudio(path,left = True,compression_factor = None):
     """
     samplerate, time_data = wavfile.read(path)
 
-    data_channel = time_data[:,0 if left else 1]
+
+    if len(time_data.shape) == 2:
+    # Check the audio file is stereo or mono
+        data_channel = time_data[:,0 if left else 1]
+    else:
+        data_channel = time_data
 
     if compression_factor:
         return compressVector(data_channel,100)
