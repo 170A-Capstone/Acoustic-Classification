@@ -37,9 +37,11 @@ def extractAudio(path,left = True,compression_factor = None):
     data_channel = time_data[:,0 if left else 1]
 
     if compression_factor:
-        return compressVector(data_channel,100)
+        return compressVector(data_channel,compression_factor)
     else:
-        return data_channel
+        # cursor execute requires array to be contiguous
+        # somehow, the array, originally non-contiguous, becomes contiguous via vectorCompression()
+        return np.ascontiguousarray(data_channel)
     
 # class Audio():
 #     def __init__(self) -> None:
