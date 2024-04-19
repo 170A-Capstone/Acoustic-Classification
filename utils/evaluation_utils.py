@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import time
 
 from sklearn.metrics import confusion_matrix
 
@@ -9,7 +10,7 @@ class Evaluator:
     """Utilities for evaluating accuracy of models
     """
 
-    def __init__(self, model, device='cpu',log=False):
+    def __init__(self, model, device='cpu',log=True):
 
         self.model = model
 
@@ -36,7 +37,7 @@ class Evaluator:
         total = 0
 
         if self.log:
-            print('[Evaluator]: Evaluating model accuracy')
+            a = time.time()
 
         with torch.no_grad():
             for inputs, labels in data_loader:
@@ -60,6 +61,10 @@ class Evaluator:
                     correct += 1
 
         accuracy = correct / len(data_loader)
+
+        if self.log:
+            b = time.time()
+            print(f'[Evaluator]: Model Accuracy Evaluated ({b-a}s)')
 
         return accuracy
     
