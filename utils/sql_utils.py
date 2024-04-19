@@ -132,6 +132,6 @@ class DB():
         audio_waveforms = [np.frombuffer(bin, dtype=np.float32) for index,bin in data]
 
         if self.log:
-            print(f'[SQL]: BLObs Dpwnloaded from Table "{table_name}"')
+            print(f'[SQL]: BLObs Downloaded from Table "{table_name}"')
 
         return audio_waveforms

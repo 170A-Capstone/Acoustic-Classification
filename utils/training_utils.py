@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 import torch.nn as nn
+import time
 
 class Trainer():
     def __init__(self,model,lr=0.001, momentum=0.9,log = False) -> None:
@@ -52,17 +53,18 @@ class Trainer():
         for epoch in range(epochs):
 
             if self.log:
-                print(f'[Trainer]: Epoch {epoch}')
+                a = time.time()
 
-            for i, (inputs,labels) in enumerate(trainloader, 0):
+            for (inputs,labels) in trainloader:
 
-                # limit training time for debugging purposes
-                # if i > 5:
-                #     break
-                
                 loss = self.training_loop(inputs,labels)
             
                 losses.append(loss)
+            
+            if self.log:
+                b = time.time()
+                print(f'[Trainer]: Completed Epoch {epoch} ({b-a}s)')
+
 
         return losses
     

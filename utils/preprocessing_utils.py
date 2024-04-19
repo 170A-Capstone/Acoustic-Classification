@@ -43,9 +43,8 @@ def extractAudio(path,left = True,compression_factor = None):
         # somehow, the array, originally non-contiguous, becomes contiguous via vectorCompression()
         return np.ascontiguousarray(data_channel)
     
-# class Audio():
-#     def __init__(self) -> None:
-#         pass
+def decodeBLOb(blob):
+    return np.frombuffer(blob, dtype=np.float32)
 
     
 def process(audio):
@@ -55,4 +54,4 @@ def process(audio):
     fft = np.fft.fft(audio)
     fft = np.abs(fft)[0:int(len(audio)/2)]
     compressed_fft = compressVector(fft,compression_factor=100)
-    return fft,compressed_fft
+    return compressed_fft
