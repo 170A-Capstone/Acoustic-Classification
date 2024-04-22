@@ -42,15 +42,17 @@ def extractAudio(path,left = True,compression_factor = None):
         data_channel = time_data
 
     if compression_factor:
-        return compressVector(data_channel,100)
+        return compressVector(data_channel,compression_factor)
     else:
-        return data_channel
+        return np.ascontiguousarray(data_channel)
     
 # class Audio():
 #     def __init__(self) -> None:
 #         pass
 
-    
+def decodeBL0b(blob):
+    return np.frombuffer(blob, dtype=np.float32)
+
 def process(audio):
 
     # https://www.youtube.com/watch?v=aQKX3mrDFoY

@@ -6,18 +6,19 @@ def main():
     """
     
     db = DB(log=True)
-    idmt = IDMT(log=True)
+    idmt = IDMT(db, log=True)
 
-    paths = idmt.getFilePaths()#[:5]
-    feature_df = idmt.getFeatureDF(paths)
+    idmt.uploadFeatureDF(table_name='idmt_features')
+    idmt.uploadAudioDF(table_name='idmt_audio')
+    #idmt.audio_features_DF(table_name='idmt_audio_features')
 
-    db.uploadDF(df=feature_df,table_name='idmt_metadata')
+    mvd = MVD(db, log=True)
 
-    audio_df = idmt.extractAudioDF(paths)
-
-    db.uploadDF(df=audio_df,table_name='idmt_audio_left')
+    mvd.uploadFeatureDF(table_name='mvd_features')
+#    mvd.audio_features_DF(table_name='mvd_audio_features')
 
     """Upload MVD data to database
+    """
     """
     dbMVD = DB(log=True)
     mvd = MVD(log=True)
@@ -30,7 +31,7 @@ def main():
     audio_dfmvd = mvd.extractAudioDF(pathsmvd)
 
     dbMVD.uploadDF(df=audio_dfmvd,table_name='mvd_audio_left')
-
+"""
     
 if __name__ == '__main__':
     main()
