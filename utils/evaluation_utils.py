@@ -64,7 +64,7 @@ class Evaluator:
 
         if self.log:
             b = time.time()
-            print(f'[Evaluator]: Model Accuracy Evaluated ({b-a}s)')
+            print(f'[Evaluator]: Model Accuracy Evaluated ({b-a:.2f}s)')
 
         return accuracy
     

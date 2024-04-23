@@ -3,6 +3,7 @@ import pandas as pd
 import time
 
 import utils.preprocessing_utils as preproc
+import utils.signal_processing_utils as sp
 
 class IDMT():
     """Utilities for handling IDMT dataset
@@ -22,15 +23,19 @@ class IDMT():
 
         self.paths = self.getFilePaths()
         
-
     def getFilePaths(self):
         paths = os.listdir(self.directory_path)
-        non_noise = [path for path in paths if '-BG' not in path]
+
+        # remove background noise entries
+        paths = [path for path in paths if '-BG' not in path]
+
+        # remove ME mic entries
+        paths = [path for path in paths if 'ME' not in path]
         
         if self.log:
             print('[IDMT]: Paths Acquired')
 
-        return non_noise
+        return paths
 
     def extractFeatures(self,path):
         """Extracts known features embedded within file name of dataset instance
@@ -50,7 +55,7 @@ class IDMT():
         features = features[:6] + [features[6][0],features[6][1]] + features[7:]
         return features
     
-    def uploadFeatureDF(self,table_name):
+    def uploadFeatureDF(self):
         """Packages all features of dataset into dataframe
 
         Args:
@@ -67,51 +72,41 @@ class IDMT():
             a = time.time()
             print('[IDMT]: Features Extracted')
 
-        self.db.uploadDF(df,table_name)
+        self.db.uploadDF(df,'idmt_features')
         
         if self.log:
             b = time.time()
-            print(f'[IDMT]: Features Uploaded ({b-a}s)')
+            print(f'[IDMT]: Features Uploaded ({b-a:.2f}s)')
 
-    def extractAudio(self,relative_path,compression_factor=None):
-        root_path = self.directory_path + relative_path
-        return preproc.extractAudio(root_path,left=True,compression_factor=compression_factor)
-    
-    # rename getAudioDF to comply with getFeatureDF naming convention
-    def uploadAudioDF(self,table_name,compression_factor=None):
+    def uploadSignalsDF(self,compression_factor=None):
 
         if self.log:
             a = time.time()
 
         # 78 seconds
-        audio_waveforms = [self.extractAudio(path,compression_factor) for path in self.paths]
+        signals = [preproc.extractAudio(self.directory_path + path,left=True,compression_factor=compression_factor) for path in self.paths]
         
         if self.log:
             b = time.time()
-            print(f'[IDMT]: Audio Extracted ({b-a}s)')
+            print(f'[IDMT]: Signals Extracted ({b-a:.2f}s)')
 
         # 117 seconds
-        self.db.uploadBLObs(audio_waveforms,table_name)
+        self.db.uploadBLObs(signals,'idmt_signals')
         
         if self.log:
             c = time.time()
-            print(f'[IDMT]: Audio Uploaded ({c-b}s)')
+            print(f'[IDMT]: Signals Uploaded ({c-b:.2f}s)')
     
     def extractLabelEmbedding(self,class_label):
         embedding = [1 if class_ == class_label else 0 for class_ in self.classes]
         return embedding
 
-    def constructDataLoader(self):
+    def downloadSignals(self):
+
         query_str = f'''
-            SELECT audio.audio,features.class 
-            FROM idmt_features AS features 
-            LEFT JOIN idmt_audio AS audio 
-            ON features.index = audio.index
+            SELECT audio 
+            FROM idmt_signals
             '''
-
-            # order by features.index desc
-            # limit 1000
-
 
         if self.log:
             a = time.time()
@@ -122,26 +117,73 @@ class IDMT():
 
         if self.log:
             b = time.time()
-            print(f'[IDMT]: Data Queried ({b-a}s)')
+            print(f'[IDMT]: Data Queried ({b-a:.2f}s)')
 
-
-        # decode audio waveforms (.02s)
-        data = [(preproc.decodeBLOb(blob),class_label) for blob,class_label in data]
+        # decode signals (.02s)
+        data = [preproc.decodeBLOb(blob[0]) for blob in data]
 
         if self.log:
             c = time.time()
-            print(f'[IDMT]: Data Decoded ({c-b}s)')
+            print(f'[IDMT]: Data Decoded ({c-b:.2f}s)')
 
-        # feature engineering (91s)
+        return data
+  
+    def transformSignals(self,transform):
 
-        data = [(preproc.process(waveform),self.extractLabelEmbedding(class_label)) for waveform,class_label in data]
+        transform_func = None
+        columns = []
+        table_name = ''
+
+        if transform == 'statistical':
+            transform_func = sp.extractStatisticalFeatures
+            columns = ['mode_var','k','s','mean','i','g','h','dev','var','variance','std','gstd_var','ent']
+            table_name = 'statistical_features'
+
+
+        signals = self.downloadSignals()
 
         if self.log:
-            d = time.time()
-            print(f'[IDMT]: Data Transformed ({d-c}s)')
+            a = time.time()
+
+        transformed_signals = [transform_func(signal) for signal in signals]
+
+        if self.log:
+            b = time.time()
+            print(f'[IDMT]: Data Transformed ({b-a:.2f}s)')
+
+        df = pd.DataFrame(transformed_signals,columns=columns)
+        self.db.uploadDF(df,f'idmt_{table_name}')
+
+        if self.log:
+            c = time.time()
+            print(f'[IDMT]: Features Uploaded ({c-b:.2f}s)')
+
+    def constructDataLoader(self):
+        query_str = f'''
+            SELECT stat_features.*,features.class 
+            FROM idmt_statistical_features AS stat_features 
+            LEFT JOIN idmt_features AS features 
+            ON features.index = stat_features.index
+            '''
+
+        if self.log:
+            a = time.time()
+
+        self.db.cursor.execute(query_str)
+        data = self.db.cursor.fetchall()
+
+        if self.log:
+            b = time.time()
+            print(f'[IDMT]: Data Queried ({b-a:.2f}s)')
+
+        data = [(row[1:-1],self.extractLabelEmbedding(row[-1])) for row in data]
+
+        if self.log:
+            c = time.time()
+            print(f'[IDMT]: Data Transformed ({c-b:.2f}s)')
         
         return data
-
+    
 
 class MVD():
     def __init__(self) -> None:
