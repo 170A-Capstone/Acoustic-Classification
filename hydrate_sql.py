@@ -7,8 +7,8 @@ def main():
     
     db = DB(log=False)
     idmt = IDMT(db,log=True)
-    idmt.uploadFeatureDF('idmt_features')
-    idmt.uploadAudioDF('idmt_audio')
+    idmt.uploadFeatureDF()
+    idmt.uploadSignalsDF()
 
 if __name__ == '__main__':
     main()

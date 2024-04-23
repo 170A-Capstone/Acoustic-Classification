@@ -63,7 +63,7 @@ class Trainer():
             
             if self.log:
                 b = time.time()
-                print(f'[Trainer]: Completed Epoch {epoch} ({b-a}s)')
+                print(f'[Trainer]: Completed Epoch {epoch} ({b-a:.2f}s)')
 
 
         return losses
