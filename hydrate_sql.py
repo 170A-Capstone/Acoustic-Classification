@@ -1,14 +1,19 @@
 from utils.sql_utils import DB
-from utils.data_utils import IDMT
+from utils.data_utils import IDMT,MVD
 
 def main():
-    """Upload IDMT data to database
+    """Upload data and signals to database
     """
-    
+
     db = DB(log=False)
+    
     idmt = IDMT(db,log=True)
-    idmt.uploadFeatureDF()
-    idmt.uploadSignalsDF()
+    idmt.uploadFeatures()
+    idmt.uploadSignals()
+    
+    mvd = MVD(db,log=True)
+    mvd.uploadFeatures()
+    mvd.uploadSignals()
 
 if __name__ == '__main__':
     main()

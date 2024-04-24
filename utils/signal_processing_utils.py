@@ -1,9 +1,4 @@
-
-# import dependencies
-# import librosa
-# import librosa.display
 import numpy as np
-# from librosa.util import fix_length
 import scipy as sp
 from scipy.stats import kurtosis,skew,mode,gstd,describe,iqr,gmean,hmean,median_abs_deviation,variation,tstd,gstd,moment,entropy
 from sklearn.preprocessing import normalize
@@ -11,26 +6,7 @@ from sklearn.preprocessing import normalize
 
 def extractStatisticalFeatures(signal):
 
-    #load the file (audio)
-
-    # sig, sr = librosa.load(self.directory_path+file)
-    
-    # pad audio files to avoid any dimensional issue
-    
-    # required_audio_size=3
-    # audio = fix_length(sig, size=required_audio_size*sr) 
-    
-    #Code for feature extraction
-
-    # local feature extraction (use only one feature as per requirement)
-    
-    #S = gfcc(sig=sig, fs=sr, num_ceps=40,nfilts=128,nfft=2048,win_hop=0.0232,win_len=0.0464)
-    #     S = mfcc(sig=sig, fs=sr, num_ceps=40,nfilts=128,nfft=2048,win_hop=0.0232,win_len=0.0464)
-    #     S=librosa.feature.melspectrogram(sig, sr=sr, n_mels=128,n_fft=2048,hop_length=512,win_length=1024)
-
-    # Global feature extraction
-    
-    ft=sp.fft.fft(signal) # code for computing the spectrum using Fast Fourier Transform
+    ft=sp.fft.fft(signal) 
     magnitude=np.absolute(ft)
     spec=magnitude
     
@@ -47,7 +23,13 @@ def extractStatisticalFeatures(signal):
     variance=np.var(spec)
     std=tstd(spec)
 
-    gstd_var=gstd(spec)
+    # transform fails for the following indices of MVD dataset: 2188,4119,6122,7899,12687
+    gstd_var = 0
+    try:
+        gstd_var=gstd(spec)
+    except:
+        pass
+
     ent= entropy(spec)
     
     features=[mode_var,k,s,mean,i,g,h,dev,var,variance,std,gstd_var,ent]
