@@ -1,12 +1,15 @@
-import utils.signal_processing_utils as sp
-from utils.data_utils import IDMT
 from utils.sql_utils import DB
-import pandas as pd
+from utils.data_utils import IDMT,MVD
 
 def main():
 
-    idmt = IDMT(DB(),log=True)
-    idmt.transformSignals(transform='statistical')
+    db = DB()
+
+    # idmt = IDMT(db,log=True)
+    # idmt.transformSignals(transform='statistical')
+
+    mvd = MVD(db,log=True)
+    mvd.transformSignals(transform='statistical')
 
 if __name__ == '__main__':
 

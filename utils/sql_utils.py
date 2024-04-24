@@ -84,28 +84,25 @@ class DB():
 
 
 
-    def uploadBLObs(self,audio_waveforms,table_name):
+    def uploadBLObs(self,signals,table_name):
 
         # create new table if necessary
         s = f'''
-            CREATE TABLE IF NOT EXISTS {table_name} (
+            CREATE TABLE IF NOT EXISTS "{table_name}" (
                 index integer PRIMARY KEY,
-                audio BYTEA NOT NULL
+                signal BYTEA NOT NULL
             )
             '''
 
         self.cursor.execute(s)
 
-        # !! COULD BE A HAZARD (inserting into non-committed table)
-        # self.conn.commit()
-
-        query_str = f'insert into {table_name}(index,audio) values (%s,%s)'
+        query_str = f'insert into "{table_name}"(index,signal) values (%s,%s)'
 
         # upload audio waveforms as BLObs with corresponding identifier (index)
-        for index,audio_waveform in enumerate(audio_waveforms):
+        for index,signal in enumerate(signals):
 
             # convert audio to BLOb
-            blob = psycopg2.Binary(audio_waveform)
+            blob = psycopg2.Binary(signal)
 
             # upload to database
             self.cursor.execute(query_str,(index,blob))
