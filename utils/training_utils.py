@@ -9,8 +9,13 @@ class Trainer():
         self.log = log
         self.model = model
 
+        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # net.to(device)
+
         # baseline loss function
-        self.criterion = nn.CrossEntropyLoss()
+        # self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
+
         self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 
         if self.log:

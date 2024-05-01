@@ -3,13 +3,16 @@ import pandas as pd
 import numpy as np
 from scipy.io import wavfile
 
+from utils.sql_utils import DB
 import utils.signal_processing_utils as sp
+
+db = DB()
 
 class Dataset():
     """Utilities for handling dataset
     """
 
-    def __init__(self,db,directory_path,log=True) -> None:
+    def __init__(self,directory_path,log=True) -> None:
         
         self.db = db
         self.directory_path = directory_path
@@ -155,13 +158,28 @@ class Dataset():
             c = time.time()
             print(f'[{self.log_label}]: Features Uploaded ({c-b:.2f}s)')
 
-    def constructDataLoader(self):
-        query_str = f'''
-            SELECT stat_features.*,features.class 
-            FROM "{self.log_label}_statistical_features" AS stat_features 
-            LEFT JOIN "{self.log_label}_features" AS features 
-            ON features.index = stat_features.index
-            '''
+    def getQueryStr(self,feature_set_type):
+
+        # CANNOT USE BECAUSE FEATURES ARE CATEGORICAL
+
+        if feature_set_type == 'ambient':
+            return f'''
+                SELECT speed,daytime,weather,"source direction",class 
+                FROM "IDMT_features"
+                limit 10
+                '''
+        if feature_set_type == 'statistical':
+            return f'''
+                SELECT stat_features.*,features.class 
+                FROM "{self.log_label}_statistical_features" AS stat_features 
+                LEFT JOIN "{self.log_label}_features" AS features 
+                ON features.index = stat_features.index
+                limit 10
+                '''
+
+    def constructDataLoader(self,feature_set_type):
+        
+        query_str = self.getQueryStr(feature_set_type)
 
         if self.log:
             a = time.time()
@@ -169,21 +187,25 @@ class Dataset():
         self.db.cursor.execute(query_str)
         data = self.db.cursor.fetchall()
 
+        # subtract index and class column to isolate training features
+        feature_size = len(data[0])-2
+
         if self.log:
             b = time.time()
             print(f'[{self.log_label}]: Data Queried ({b-a:.2f}s)')
 
         data = [(row[1:-1],self.extractLabelEmbedding(row[-1])) for row in data]
+        # data *= 100
 
         if self.log:
             c = time.time()
             print(f'[{self.log_label}]: Data Transformed ({c-b:.2f}s)')
         
-        return data
+        return feature_size,data
     
 class IDMT(Dataset):
-    def __init__(self,db,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:
-        super().__init__(db,directory_path,log)
+    def __init__(self,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:
+        super().__init__(directory_path,log)
 
         self.log_label = 'IDMT'
         self.columns = ['date','location','speed','position','daytime','weather','class','source direction','mic','channel']
@@ -229,8 +251,8 @@ class IDMT(Dataset):
         return signal
 
 class MVD(Dataset):
-    def __init__(self,db,directory_path = "./MVDA/",log=True) -> None:
-        super().__init__(db,directory_path,log)
+    def __init__(self,directory_path = "./MVDA/",log=True) -> None:
+        super().__init__(directory_path,log)
 
         self.log_label = 'MVD'
         self.columns = ['record_num', 'mic', 'class']

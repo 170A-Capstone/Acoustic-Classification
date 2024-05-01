@@ -1,14 +1,11 @@
-from utils.sql_utils import DB
 from utils.data_utils import IDMT,MVD
 
 def main():
 
-    db = DB()
-
-    # idmt = IDMT(db,log=True)
+    # idmt = IDMT()
     # idmt.transformSignals(transform='statistical')
 
-    mvd = MVD(db,log=True)
+    mvd = MVD()
     mvd.transformSignals(transform='statistical')
 
 if __name__ == '__main__':
