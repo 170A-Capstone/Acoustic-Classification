@@ -34,7 +34,7 @@ def extractStatisticalFeatures(signal):
     
     features=[mode_var,k,s,mean,i,g,h,dev,var,variance,std,gstd_var,ent]
 
-    features=normalize([features])
+#    features=normalize([features])
     features=np.array(features)
     features=np.reshape(features,(13,))
     #feat=features # save the matrix and vector in a list

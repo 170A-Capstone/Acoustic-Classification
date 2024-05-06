@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
 
-from sql_credentials import sql_credentials
+#from sql_credentials import sql_credentials
 
 class DB():
     """Utilities for interfacing with postgreSQL database
@@ -28,11 +28,11 @@ class DB():
         self.engine = self.connectEngine()
 
     def connectCursor(self):
-        conn = psycopg2.connect(host=sql_credentials['host'],
-                            dbname=sql_credentials['dbname'],
-                            user=sql_credentials['user'],
-                            password=sql_credentials['password'],
-                            port=5433)
+        conn = psycopg2.connect(host='localhost',
+                            dbname='stats_170',
+                            user='postgres',
+                            password='13683819895Rjy',
+                            port=5432)
         cursor = conn.cursor()
         return conn,cursor
 
@@ -40,11 +40,11 @@ class DB():
 
         # construct connection string from sql credentials
         cnxn_str = 'postgresql://{user}:{password}@{host}:{port}/{dbname}'
-        cnxn_str = cnxn_str.format(host=sql_credentials['host'],
-                            dbname=sql_credentials['dbname'],
-                            user=sql_credentials['user'],
-                            password=sql_credentials['password'],
-                            port=sql_credentials['port'],
+        cnxn_str = cnxn_str.format(host='localhost',
+                            dbname='stats_170',
+                            user='postgres',
+                            password='13683819895Rjy',
+                            port=5432
                             )
 
         # establish connection

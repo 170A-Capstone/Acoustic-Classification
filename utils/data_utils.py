@@ -5,6 +5,8 @@ from scipy.io import wavfile
 
 import utils.signal_processing_utils as sp
 
+import utils.data_visualization_utils as dv
+
 class Dataset():
     """Utilities for handling dataset
     """
@@ -155,6 +157,52 @@ class Dataset():
             c = time.time()
             print(f'[{self.log_label}]: Features Uploaded ({c-b:.2f}s)')
 
+
+    def data_visualization(self, plot):
+        plot_func = None
+
+        if plot == 'distribution':
+            plot_func = dv.feature_distribution_visualization
+        elif plot == 'correlation':
+            plot_func = dv.feature_correlation_visualization
+        
+        query_str = f'''
+            SELECT stat_features.*,features.* 
+            FROM "{self.log_label}_statistical_features" AS stat_features 
+            LEFT JOIN "{self.log_label}_features" AS features 
+            ON features.index = stat_features.index
+            '''
+        
+        if self.log:
+            a = time.time()
+        
+        self.db.cursor.execute(query_str)
+        
+        if self.log_label == "IDMT":
+            feature_columns = ['index', 'mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance',
+                           'std', 'gstd_var', 'ent', 'index', 'date', 'location', 'speed', 'position', 'daytime',
+                           'weather', 'class', 'source direction', 'mic', 'channel']
+            data = self.db.cursor.fetchall()
+            df = pd.DataFrame(data, columns=feature_columns)
+            df = df.drop(columns="index")
+            df = df.drop(columns="position")
+        elif self.log_label == "MVD":
+            feature_columns = ['index', 'mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance',
+                           'std', 'gstd_var', 'ent', 'index', 'record_num', 'mic', 'class']
+            data = self.db.cursor.fetchall()
+            df = pd.DataFrame(data, columns=feature_columns)
+            df = df.drop(columns="index")
+            df = df.drop(columns="record_num")
+
+        plot_func(df)
+
+        if self.log:
+            b = time.time()
+            print(f'[{self.log_label}]: Data {plot} Plotted ({b-a:.2f}s)')
+
+        
+
+
     def constructDataLoader(self):
         query_str = f'''
             SELECT stat_features.*,features.class 
@@ -182,7 +230,7 @@ class Dataset():
         return data
     
 class IDMT(Dataset):
-    def __init__(self,db,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:
+    def __init__(self,db,directory_path = "/Users/apple/Desktop/IDMT/audio/",log=True) -> None:
         super().__init__(db,directory_path,log)
 
         self.log_label = 'IDMT'
@@ -212,7 +260,6 @@ class IDMT(Dataset):
             array[str]: itemized features
                 example: ['2019-10-22-08-40', 'Fraunhofer-IDMT', '30', '1116695', 'M', 'D', 'C', 'R', 'ME', '12']
         """
-
         features = path[:-4].split('_')
         features[2] = features[2][:-3]
         features[-1] = features[-1][2:]
@@ -229,7 +276,7 @@ class IDMT(Dataset):
         return signal
 
 class MVD(Dataset):
-    def __init__(self,db,directory_path = "./MVDA/",log=True) -> None:
+    def __init__(self,db,directory_path = "/Users/apple/Desktop/MVD/",log=True) -> None:
         super().__init__(db,directory_path,log)
 
         self.log_label = 'MVD'
