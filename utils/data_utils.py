@@ -126,12 +126,16 @@ class Dataset():
 
         transform_func = None
         columns = []
-        table_name = ''
+        table_name = f'{transform}_features'
 
         if transform == 'statistical':
             transform_func = sp.extractStatisticalFeatures
             columns = ['mode_var','k','s','mean','i','g','h','dev','var','variance','std','gstd_var','ent']
-            table_name = 'statistical_features'
+
+        elif transform == 'harmonic':
+            transform_func = sp.extractHarmonicFeatures
+            columns = ['dominant_freq', 'dominant_amplitude', 'first_harmonic_freq']
+
 
         signals = self.downloadSignals()
 
@@ -152,6 +156,7 @@ class Dataset():
             print(f'[{self.log_label}]: Data Transformed ({b-a:.2f}s)')
 
         df = pd.DataFrame(transformed_signals,columns=columns)
+
         self.db.uploadDF(df,f'{self.log_label}_{table_name}')
 
         if self.log:
@@ -249,6 +254,80 @@ class IDMT(Dataset):
         signal = super().extractSignal(path,transform_func)
 
         return signal
+
+class IDMT_BG(Dataset):
+    def __init__(self,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:
+        super().__init__(directory_path,log)
+
+        self.log_label = 'IDMT-BG'
+        self.columns = ['date','location','speed','position','mic','channel']
+        
+        # signal v noise
+        self.classes = ['S', 'N']
+        self.dtype = np.float32
+
+        self.paths = self.getFilePaths()
+
+    def getFilePaths(self):
+
+        # filter:
+        #   1. non-background noise entries
+        #   2. non-SE entries
+        filter_condition = lambda path: '-BG' in path and 'ME' not in path
+
+        return super().getFilePaths(filter_condition=filter_condition)
+    
+    def extractFeatures(self,path):
+        features = path[:-7].split('_')
+        return features
+
+    def extractSignal(self,path):
+
+        # stereo -> left channel
+        transform_func = lambda signal: signal[:,0]
+
+        signal = super().extractSignal(path,transform_func)
+
+        return signal
+
+    def constructDataLoader(self):
+        
+        # query_str = self.getQueryStr(feature_set_type)
+        # query_str = f'''
+        #     select * from "IDMT_harmonic_features"
+        #     limit 10
+        #     '''
+
+        # self.db.cursor.execute(query_str)
+        # data = self.db.cursor.fetchall()
+        
+
+        if self.log:
+            a = time.time()
+
+        data1 = self.db.downloadDF('IDMT_harmonic_features')
+        data2 = self.db.downloadDF('IDMT-BG_harmonic_features')
+        
+        if self.log:
+            b = time.time()
+            print(f'[{self.log_label}]: Data Queried ({b-a:.2f}s)')
+
+        # data1.drop('index', axis=1)
+        data1['label'] = 1
+
+        # data2.drop('index', axis=1)
+        data2['label'] = 0
+
+        data = pd.concat([data1,data2])
+        data = [(row[1:-1],[row[-1]]) for row in data.values]
+
+        if self.log:
+            c = time.time()
+            print(f'[{self.log_label}]: Data Transformed ({c-b:.2f}s)')
+
+        feature_size = 3
+
+        return feature_size,data
 
 class MVD(Dataset):
     def __init__(self,directory_path = "./MVDA/",log=True) -> None:

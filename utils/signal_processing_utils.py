@@ -41,6 +41,26 @@ def extractStatisticalFeatures(signal):
     
     return features
 
+SR = 9866
 
+def extractHarmonicFeatures(signal):
+    # Perform FFT on the signal
+    fft_result = np.fft.fft(signal)
+    
+    # Get the frequencies corresponding to the FFT result
+    frequencies = np.fft.fftfreq(len(signal), 1/SR)
+    
+    # Find the index of the maximum amplitude in the FFT result
+    max_amp_index = np.argmax(np.abs(fft_result))
 
+    # return max_amp_index
+    
+    # Extract the dominant frequency, first harmonic, and their amplitudes
+    dominant_freq = frequencies[max_amp_index]
+    dominant_amplitude = np.abs(fft_result[max_amp_index])
+    first_harmonic_freq = dominant_freq * 2
+    # first_harmonic_amplitude = np.abs(fft_result[max_amp_index * 2])
 
+    features = [dominant_freq, dominant_amplitude, first_harmonic_freq]
+
+    return features
