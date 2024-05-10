@@ -165,6 +165,8 @@ class Dataset():
             plot_func = dv.feature_distribution_visualization
         elif plot == 'correlation':
             plot_func = dv.feature_correlation_visualization
+        elif plot == 'PCA':
+            plot_func = dv.PCA_analysis
         
         query_str = f'''
             SELECT stat_features.*,features.* 
@@ -186,7 +188,7 @@ class Dataset():
             df = pd.DataFrame(data, columns=feature_columns)
             df = df.drop(columns="index")
             df = df.drop(columns="position")
-        elif self.log_label == "MVD":
+        elif self.log_label == "MVD" or self.log_label=="PCA":
             feature_columns = ['index', 'mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance',
                            'std', 'gstd_var', 'ent', 'index', 'record_num', 'mic', 'class']
             data = self.db.cursor.fetchall()
@@ -194,11 +196,13 @@ class Dataset():
             df = df.drop(columns="index")
             df = df.drop(columns="record_num")
 
-        plot_func(df)
+        result = plot_func(df)
 
         if self.log:
             b = time.time()
             print(f'[{self.log_label}]: Data {plot} Plotted ({b-a:.2f}s)')
+
+        return result
 
         
 

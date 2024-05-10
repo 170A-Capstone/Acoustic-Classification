@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.decomposition import PCA
+import pandas as pd
+from matplotlib.colors import ListedColormap
 
 def feature_distribution_visualization(df):
     # Get the list of features
@@ -31,9 +34,9 @@ def feature_distribution_visualization(df):
         else:
             # For numerical variables, use histogram with logarithmic scale
             nonzero_values = df[feature][df[feature] != 0]  # Exclude zero values for log scale
-            log_bins = np.geomspace(np.min(nonzero_values), np.max(df[feature]), num=20)
-            plt.hist(df[feature], bins=log_bins, color='skyblue', edgecolor='black')
-            plt.xscale('log')  # Set x-axis to log scale
+            #log_bins = np.geomspace(np.min(nonzero_values), np.max(df[feature]), num=20)
+            plt.hist(df[feature], bins=20, color='skyblue', edgecolor='black')
+            #plt.xscale('log')  # Set x-axis to log scale
             plt.title(feature)
             plt.xlabel('Value')
             plt.ylabel('Frequency')
@@ -60,3 +63,60 @@ def feature_correlation_visualization(df):
     
     plt.title('Feature Correlation Matrix')
     plt.show()
+
+def PCA_analysis(df):
+    # Select only numerical columns for PCA
+    numerical_df = df.select_dtypes(include=[np.number])
+    
+    # Standardize the numerical data
+    standardized_data = (numerical_df - numerical_df.mean()) / numerical_df.std()
+    
+    # Perform PCA
+    pca = PCA()
+    principal_components = pca.fit_transform(standardized_data)
+    
+    # Explained variance ratio
+    explained_variance_ratio = pca.explained_variance_ratio_
+    
+    # Plot explained variance ratio
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(np.cumsum(explained_variance_ratio), marker='o')
+    plt.xlabel('Number of Principal Components')
+    plt.ylabel('Cumulative Explained Variance Ratio')
+    plt.title('Explained Variance Ratio by Principal Components')
+    plt.grid(True)
+    
+    # Plot key component plot
+
+    class_colors = {'N': 'red', 'C': 'blue', 'T': 'green', 'M': 'orange'}  # Add more if needed
+    class_colors2 = {'B': 'Reds', 'C': 'Blues', 'T': 'Greens', 'M': 'Oranges'}  # Add more if needed
+
+    
+    # Create a custom colormap using ListedColormap
+    plt.subplot(1, 2, 2)
+    for category, color in class_colors.items():
+        plt.scatter(principal_components[df["class"] == category, 0], 
+                    principal_components[df["class"] == category, 1], 
+                    color=color, 
+                    label=category)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('Key Component Plot')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Return the PCA results
+    result_dict =  {
+        'principal_components': principal_components,
+        'explained_variance_ratio': explained_variance_ratio,
+        'pca': pca
+    }
+
+    return result_dict
+
