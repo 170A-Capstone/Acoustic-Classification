@@ -49,6 +49,7 @@ def main():
     b = time.time()
     print(f'Time taken for SVM: {b-a:.2f}')
     # Best accuracy: 0.87 with {'C': 100, 'degree': 3, 'gamma': 'scale', 'kernel': 'poly'}
+    # took 59 minutes
 
     # idmt = IDMT()
     
