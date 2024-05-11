@@ -1,5 +1,5 @@
 # from model import Net
-
+from sklearn.model_selection import GridSearchCV
 from models.nn import Shallow, Deep
 from utils.data_utils import IDMT,MVD
 from utils.training_utils import Trainer
@@ -7,10 +7,10 @@ from utils.training_utils import Trainer
 def main():
 
     idmt = IDMT()
-
+    
     epochs = 10
 
-    features = ['statistical']
+    features = ['ambient']
     # models = [Deep]
     models = [Shallow,Deep]
     # param_2 = ['a','b']

@@ -8,13 +8,13 @@ def main():
     idmt_bg.uploadFeatures()
     idmt_bg.uploadSignals()
     
-    # idmt = IDMT()
-    # idmt.uploadFeatures()
-    # idmt.uploadSignals()
+    idmt = IDMT()
+    idmt.uploadFeatures()
+    idmt.uploadSignals()
     
-    # mvd = MVD()
-    # mvd.uploadFeatures()
-    # mvd.uploadSignals()
+    mvd = MVD()
+    mvd.uploadFeatures()
+    mvd.uploadSignals()
 
 if __name__ == '__main__':
     main()
