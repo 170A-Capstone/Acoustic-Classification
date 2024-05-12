@@ -10,7 +10,7 @@ import time
 def main():
     # Grid search for KNN
     a = time.time()
-    knn, X_train_scaled, y_train, y_test, y_pred= knn_model()
+    knn, X_train_scaled, y_train, y_test, y_pred, class_names, knn_for_gridsearch= knn_model()
 
     param_grid_knn = {
     'n_neighbors': [3, 5, 7, 10],
@@ -19,7 +19,7 @@ def main():
     }
 
     # Set up the grid search for KNN
-    grid_search_knn = GridSearchCV(estimator=knn, param_grid=param_grid_knn, cv=5, scoring='accuracy', verbose=1)
+    grid_search_knn = GridSearchCV(estimator=knn_for_gridsearch, param_grid=param_grid_knn, cv=5, scoring='accuracy', verbose=1)
     grid_search_knn.fit(X_train_scaled, y_train)
 
     print("Best parameters for KNN:", grid_search_knn.best_params_)
@@ -28,9 +28,10 @@ def main():
     print(f'Time taken for kNN: {b-a:.2f}')
     # Best accuracy: 0.86 with {'metric': 'manhattan', 'n_neighbors': 10, 'weights': 'distance'}
 
+
     # Grid search for SVM
     a = time.time()
-    svm, X_train_scaled, y_train, y_test, y_pred = svm_model()
+    svm, X_train_scaled, y_train, y_test, y_pred, class_names, svm_for_gridsearch = svm_model()
 
     param_grid_svm = {
     'C': [0.1, 1, 10, 100],
@@ -40,7 +41,7 @@ def main():
     }
 
     # Set up the grid search for SVM
-    grid_search_svm = GridSearchCV(estimator=svm, param_grid=param_grid_svm, cv=5, scoring='accuracy', verbose=1)
+    grid_search_svm = GridSearchCV(estimator=svm_for_gridsearch, param_grid=param_grid_svm, cv=5, scoring='accuracy', verbose=1)
     grid_search_svm.fit(X_train_scaled, y_train)
 
     # Best parameters and best score

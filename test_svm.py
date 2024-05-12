@@ -15,7 +15,7 @@ def plot_confusion_matrix(cm, title='Confusion Matrix', class_names=None):
 
 def main():
     # Get the model and predictions
-    svm, X_train_scaled, y_train,y_test, y_pred, class_names = svm_model()
+    svm, X_train_scaled, y_train,y_test, y_pred, class_names, svm_for_gridsearch = svm_model()
     
     # Evaluate the model
     print("Accuracy:", accuracy_score(y_test, y_pred))

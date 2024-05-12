@@ -14,7 +14,7 @@ def plot_confusion_matrix(cm, title='Confusion Matrix', class_names=None):
 
 
 def main():
-    knn, X_train_scaled, y_train, y_test, y_pred, class_names = knn_model()
+    knn, X_train_scaled, y_train, y_test, y_pred, class_names, knn_for_gridsearch = knn_model()
     print("Accuracy:", accuracy_score(y_test, y_pred))
     #print("\nClassification Report:\n", classification_report(y_test, y_pred))
 

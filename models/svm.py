@@ -26,4 +26,6 @@ def svm_model():
     # Make predictions
     y_pred = svm_model.predict(X_test_scaled)
 
-    return svm_model, X_train_scaled, y_train, y_test, y_pred, class_names
+    svm_for_gridsearch = SVC()
+
+    return svm_model, X_train_scaled, y_train, y_test, y_pred, class_names, svm_for_gridsearch

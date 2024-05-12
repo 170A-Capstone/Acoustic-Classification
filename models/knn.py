@@ -18,10 +18,12 @@ def knn_model():
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    knn = KNeighborsClassifier(n_neighbors=3)
+    knn = KNeighborsClassifier(n_neighbors=10, metric='manhattan', weights='distance')
     knn.fit(X_train_scaled, y_train)
 
     y_pred = knn.predict(X_test_scaled)
 
-    return knn, X_train_scaled, y_train, y_test, y_pred, class_names
+    knn_for_gridsearch = KNeighborsClassifier()
+
+    return knn, X_train_scaled, y_train, y_test, y_pred, class_names, knn_for_gridsearch
 
