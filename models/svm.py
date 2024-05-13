@@ -2,13 +2,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from utils.sql_utils import DB
+import pandas as pd
 
 def svm_model():
     db = DB()
-    df = db.downloadDF('IDMT_statistical_features')
+    idmt_df = db.downloadDF('IDMT_statistical_features')
+    mvd_df = db.downloadDF('MVD_statistical_features')
+    df = pd.concat([idmt_df, mvd_df], ignore_index=True)
     X = df[['mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance', 'std', 'gstd_var', 'ent']]  # Features
 
-    df = db.downloadDF('IDMT_features')
+    idmt_df = db.downloadDF('IDMT_features')
+    mvd_df = db.downloadDF('MVD_features')
+    df = pd.concat([idmt_df, mvd_df], ignore_index=True)
     y = df['class']          # Target variable
     class_names = y.unique()
 

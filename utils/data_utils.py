@@ -179,7 +179,7 @@ class Dataset():
                 FROM "{self.log_label}_statistical_features" AS stat_features 
                 LEFT JOIN "{self.log_label}_features" AS features 
                 ON features.index = stat_features.index
-                limit 10
+                
                 '''
 
     def constructDataLoader(self,feature_set_type):

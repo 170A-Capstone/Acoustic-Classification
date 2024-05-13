@@ -5,8 +5,8 @@ def main():
     # idmt_bg = IDMT_BG()
     # idmt_bg.transformSignals(transform='harmonic')
 
-    idmt = IDMT()
-    idmt.transformSignals(transform='statistical')
+    # idmt = IDMT()
+    # idmt.transformSignals(transform='statistical')
 
     # mvd = MVD()
     # mvd.transformSignals(transform='statistical')

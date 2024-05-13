@@ -1,14 +1,15 @@
 from utils.sql_utils import DB
 from utils.data_utils import Dataset, IDMT, MVD
+import pandas as pd
 
 def main():
-    dataset = IDMT()
-    feature_size, data = dataset.constructDataLoader('statistical')
-    print(feature_size)
-    print(len(data))
-    print(data[0][0])
-    print(data[0][1])
-    print(data[1][1])
+    db = DB()
+    idmt_df = db.downloadDF('IDMT_features')
+    mvd_df = db.downloadDF('MVD_features')
+
+    df = pd.concat([idmt_df, mvd_df], ignore_index=True)
+    print(df.shape)
+    print(df.head())
 
 if __name__ == '__main__':
     main()
