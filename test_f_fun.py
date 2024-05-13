@@ -1,10 +1,14 @@
 from utils.sql_utils import DB
+from utils.data_utils import Dataset, IDMT, MVD
 
 def main():
-    db = DB()
-    df = db.downloadDF('IDMT_features')
-    y = df['class']          
-    print(y.unique())
+    dataset = IDMT()
+    feature_size, data = dataset.constructDataLoader('statistical')
+    print(feature_size)
+    print(len(data))
+    print(data[0][0])
+    print(data[0][1])
+    print(data[1][1])
 
 if __name__ == '__main__':
     main()

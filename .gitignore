@@ -2,3 +2,4 @@ sql_credentials.py
 IDMT_Traffic/
 MVDA/
 __pycache__/
+test_f_fun.py
