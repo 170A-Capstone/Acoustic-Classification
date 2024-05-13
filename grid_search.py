@@ -6,6 +6,7 @@ from models.svm import svm_model
 from utils.data_utils import IDMT,MVD
 from utils.training_utils import Trainer
 import time
+import json
 
 def main():
     # Grid search for KNN
@@ -21,6 +22,8 @@ def main():
     # Set up the grid search for KNN
     grid_search_knn = GridSearchCV(estimator=knn_for_gridsearch, param_grid=param_grid_knn, cv=5, scoring='accuracy', verbose=1)
     grid_search_knn.fit(X_train_scaled, y_train)
+
+    best_knn_params = grid_search_knn.best_params_
 
     print("Best parameters for KNN:", grid_search_knn.best_params_)
     print("Best score for KNN:", grid_search_knn.best_score_)
@@ -44,11 +47,30 @@ def main():
     grid_search_svm = GridSearchCV(estimator=svm_for_gridsearch, param_grid=param_grid_svm, cv=5, scoring='accuracy', verbose=1)
     grid_search_svm.fit(X_train_scaled, y_train)
 
+    best_svm_params = grid_search_svm.best_params_
+
     # Best parameters and best score
     print("Best parameters for SVM:", grid_search_svm.best_params_)
     print("Best score for SVM:", grid_search_svm.best_score_)
     b = time.time()
     print(f'Time taken for SVM: {b-a:.2f}')
+
+    results = {
+        'knn': {
+            'best_params': best_knn_params,
+            'best_score': grid_search_knn.best_score_
+        },
+        'svm': {
+            'best_params': best_svm_params,
+            'best_score': grid_search_svm.best_score_
+        }
+    }
+
+    # with open('results_for_gridsearch.json', 'w') as f:
+    #     json.dump(results, f, indent=4)
+
+    # print('Results saved to results_for_gridsearch.json')
+
     # Best accuracy: 0.87 with {'C': 100, 'degree': 3, 'gamma': 'scale', 'kernel': 'poly'}
     # took 59 minutes
 
