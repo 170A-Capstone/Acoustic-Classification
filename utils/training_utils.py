@@ -16,6 +16,8 @@ class Trainer():
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
 
+        print(lr)
+
         self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 
         if self.log:
@@ -51,6 +53,7 @@ class Trainer():
     
     def training_epoch(self,epochs,trainloader):
         losses = []
+        loss = 0
 
         if self.log:
             print(f'[Trainer]: Training on {len(trainloader)} data points')
@@ -64,7 +67,7 @@ class Trainer():
 
                 loss = self.training_loop(inputs,labels)
             
-                losses.append(loss)
+            losses.append(loss)
             
             if self.log:
                 b = time.time()

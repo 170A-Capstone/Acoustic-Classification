@@ -2,6 +2,9 @@ import os, time
 import pandas as pd
 import numpy as np
 from scipy.io import wavfile
+from sklearn.model_selection import train_test_split
+import numpy as np
+
 
 from utils.sql_utils import DB
 import utils.signal_processing_utils as sp
@@ -179,7 +182,6 @@ class Dataset():
                 FROM "{self.log_label}_statistical_features" AS stat_features 
                 LEFT JOIN "{self.log_label}_features" AS features 
                 ON features.index = stat_features.index
-                limit 10
                 '''
 
     def constructDataLoader(self,feature_set_type):
@@ -200,13 +202,15 @@ class Dataset():
             print(f'[{self.log_label}]: Data Queried ({b-a:.2f}s)')
 
         data = [(row[1:-1],self.extractLabelEmbedding(row[-1])) for row in data]
-        # data *= 100
+
+        # Split the array into train and test sets
+        train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
         if self.log:
             c = time.time()
             print(f'[{self.log_label}]: Data Transformed ({c-b:.2f}s)')
         
-        return feature_size,data
+        return feature_size,train_data,test_data
     
 class IDMT(Dataset):
     def __init__(self,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:

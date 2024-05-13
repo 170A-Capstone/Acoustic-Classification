@@ -10,14 +10,16 @@ class Shallow(nn.Module):
 
     def __init__(self,input_dim,output_dim,log = False):
 
-        self.log = True
+        self.log = log
+
+        self.name = 'Shallow'
 
         super(Shallow, self).__init__()
         
         self.fc = nn.Linear(input_dim, output_dim)
 
         if self.log:
-            print('[Model]: Model initialized')
+            print('[Model-]: Model initialized')
     
     def predict(self,inputs):
         inputs = torch.Tensor(inputs)
@@ -27,21 +29,29 @@ class Shallow(nn.Module):
         x = self.fc(x)
         x = F.sigmoid(x)
         return x
+    
+    @staticmethod
+    def name():
+        return 'shallow'
 
 class Deep(nn.Module):
-    def __init__(self,input_dim,log = False):
+    def __init__(self,input_dim,output_dim,log = False):
 
         super(Deep, self).__init__()
 
-        output_dim = int(input_dim/2)
+        layer_dim = int(input_dim/2)
 
-        self.fc = nn.Linear(input_dim, output_dim)
-        self.shallow = Shallow(input_dim=output_dim)
+        self.fc = nn.Linear(input_dim, layer_dim)
+        self.shallow = Shallow(input_dim=layer_dim,output_dim=output_dim)
         
     def forward(self, x):
         x = self.fc(x)
         x = F.relu(x)
         return self.shallow(x)
+    
+    @staticmethod
+    def name():
+        return 'deep'
     
 def loadModelParams(model,file_name):
     path = f'./model_params/{file_name}.pt'

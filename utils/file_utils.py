@@ -1,5 +1,5 @@
 import pandas as pd
-import os
+import os, json
 
 def check_folder_exists(folder_path):
     """
@@ -47,3 +47,8 @@ def store_csv(data,columns,path):
     df.to_csv(path, index=False)
 
     print(f"\nDataFrame saved to {path}")
+
+def saveJson(file_path,data):
+    
+    with open(file_path, "w") as json_file:
+        json.dump(data, json_file)
