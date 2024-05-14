@@ -28,6 +28,7 @@ class Shallow(nn.Module):
     def forward(self, x):
         x = self.fc(x)
         x = F.sigmoid(x)
+        # x = F.relu(x)
         return x
     
     @staticmethod
@@ -52,6 +53,25 @@ class Deep(nn.Module):
     @staticmethod
     def name():
         return 'deep'
+    
+class AutoEncoder(nn.Module):
+    def __init__(self,input_dim,output_dim,log = False):
+
+        super(AutoEncoder, self).__init__()
+
+        self.encoder = nn.Linear(input_dim, 1)
+        self.decoder = nn.Linear(1, output_dim)
+        
+    def forward(self, x):
+        x = self.encoder(x)
+        x = F.relu(x)
+        x = self.decoder(x)
+        x = F.sigmoid(x)
+        return x
+    
+    @staticmethod
+    def name():
+        return 'autoencoder'
     
 def loadModelParams(model,file_name):
     path = f'./model_params/{file_name}.pt'

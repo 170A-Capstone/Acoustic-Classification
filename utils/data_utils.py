@@ -183,7 +183,17 @@ class Dataset():
                 LEFT JOIN "{self.log_label}_features" AS features 
                 ON features.index = stat_features.index
                 '''
-
+        if feature_set_type == 'statistical-PCA':
+            return f'''
+                SELECT stat_features.*,features.class 
+                FROM (
+                    SELECT index,mode_var, s, g, var, gstd_var, ent 
+                    FROM "{self.log_label}_statistical_features"
+                ) AS stat_features 
+                LEFT JOIN "{self.log_label}_features" AS features 
+                ON features.index = stat_features.index
+                '''
+        
     def constructDataLoader(self,feature_set_type):
         
         query_str = self.getQueryStr(feature_set_type)
@@ -201,10 +211,13 @@ class Dataset():
             b = time.time()
             print(f'[{self.log_label}]: Data Queried ({b-a:.2f}s)')
 
-        data = [(row[1:-1],self.extractLabelEmbedding(row[-1])) for row in data]
+        # data = [(row[1:-1],self.extractLabelEmbedding(row[-1])) for row in data]
+
+        # scale up values by order(s) of magnitude
+        data = [(np.array(row[1:-1])*(10e5),self.extractLabelEmbedding(row[-1])) for row in data]
 
         # Split the array into train and test sets
-        train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
+        train_data, test_data = train_test_split(data, test_size=0.2)
 
         if self.log:
             c = time.time()

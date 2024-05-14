@@ -16,9 +16,8 @@ class Trainer():
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
 
-        print(lr)
-
-        self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=lr)
+        # self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 
         if self.log:
             print('[Trainer]: Trainer initialized')

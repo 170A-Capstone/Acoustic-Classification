@@ -43,12 +43,14 @@ class Evaluator:
             for inputs, labels in data_loader:
 
                 inputs = torch.Tensor(inputs)
+                # print(inputs)
 
                 # what is the purpose of this?
                 # inputs, labels = inputs.to(self.device), labels.to(self.device)
 
                 # forward pass -> probability of predicting each class
                 outputs = self.model(inputs)
+                # print(outputs)
 
                 # gets index of highest probability in output vector
                 # index of highest probability = predicted label
@@ -57,7 +59,8 @@ class Evaluator:
 
                 actual_class = labels.index(1)
 
-                if predicted_class == actual_class:
+                if predicted_class != 0:
+                # if predicted_class == actual_class:
                     correct += 1
 
         accuracy = correct / len(data_loader)
