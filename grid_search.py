@@ -66,10 +66,10 @@ def main():
         }
     }
 
-    # with open('results_for_gridsearch.json', 'w') as f:
-    #     json.dump(results, f, indent=4)
+    with open('results_for_gridsearch.json', 'w') as f:
+        json.dump(results, f, indent=4)
 
-    # print('Results saved to results_for_gridsearch.json')
+    print('Results saved to results_for_gridsearch.json')
 
     # Best accuracy: 0.87 with {'C': 100, 'degree': 3, 'gamma': 'scale', 'kernel': 'poly'}
     # took 59 minutes
