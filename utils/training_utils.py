@@ -50,30 +50,80 @@ class Trainer():
         # return loss value for analysis
         return loss.item()
     
-    def training_epoch(self,epochs,trainloader):
-        losses = []
-        loss = 0
+    def training_epoch(self,epochs,train_loader,val_loader):
+        accuracies = []
 
         if self.log:
-            print(f'[Trainer]: Training on {len(trainloader)} data points')
+            print(f'[Trainer]: Training on {len(train_loader)} data points')
+
+        # evaluate accuracy with no training
+        self.model.eval()
+        accuracy = self.evaluate(val_loader)
+        accuracies.append(accuracy)
 
         for epoch in range(epochs):
 
             if self.log:
                 a = time.time()
 
-            for (inputs,labels) in trainloader:
+            # train
+            self.model.train()
+            for (inputs,labels) in train_loader:
+                self.training_loop(inputs,labels)
 
-                loss = self.training_loop(inputs,labels)
-            
-            losses.append(loss)
+            # evaluate
+            self.model.eval()
+            accuracy = self.evaluate(val_loader)
+            accuracies.append(accuracy)
             
             if self.log:
                 b = time.time()
                 print(f'[Trainer]: Completed Epoch {epoch} ({b-a:.2f}s)')
 
+        return accuracies
+    
+    def evaluate(self,data_loader) -> float:
+        """Measures accuracy of a model at the time of inference
 
-        return losses
+        Returns:
+            float: model accuracy [0,1]
+        """
+        correct = 0
+
+        # if self.log:
+        #     a = time.time()
+
+        with torch.no_grad():
+            for inputs, labels in data_loader:
+
+                inputs = torch.Tensor(inputs)
+                # print(inputs)
+
+                # what is the purpose of this?
+                # inputs, labels = inputs.to(self.device), labels.to(self.device)
+
+                # forward pass -> probability of predicting each class
+                outputs = self.model(inputs)
+                # print(outputs)
+
+                # gets index of highest probability in output vector
+                # index of highest probability = predicted label
+                value,predicted_class = torch.max(outputs.data,0)
+                predicted_class = predicted_class.item()
+
+                actual_class = labels.index(1)
+
+                # if predicted_class != 0:
+                if predicted_class == actual_class:
+                    correct += 1
+
+        accuracy = correct / len(data_loader)
+
+        # if self.log:
+        #     b = time.time()
+        #     print(f'[Evaluator]: Model Accuracy Evaluated ({b-a:.2f}s)')
+
+        return accuracy
 
     def storeParams(self,file_name):
         model_parameters = self.model.state_dict()

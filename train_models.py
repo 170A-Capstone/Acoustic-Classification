@@ -6,8 +6,8 @@ from utils.evaluation_utils import Evaluator
 
 def main():
 
-    idmt_bg = IDMT_BG()
-    feature_size,trainloader = idmt_bg.constructDataLoader()
+    # idmt_bg = IDMT_BG()
+    # feature_size,trainloader = idmt_bg.constructDataLoader()
 
     # idmt = IDMT()
     # trainloader = idmt.constructDataLoader()
@@ -15,7 +15,18 @@ def main():
     # mvd = MVD()
     # trainloader = mvd.constructDataLoader()
 
-    model = Shallow(input_dim=feature_size,output_dim=1)
+    feature_size,train_data,test_data = MVD().constructDataLoader(feature_set_type='statistical-PCA')
+
+    model = Shallow(input_dim=feature_size,output_dim=4)
+
+    trainer = Trainer(model,lr=10e-1,momentum=.9,log=False)
+
+    accuracies = trainer.training_epoch(epochs=5,train_loader=train_data,val_loader=test_data)
+
+    print(accuracies)
+
+    return
+
 
     # !! BE VERY CONSCIOUS OF LEARNING RATE !!
     # can either stop learning completely if too small or collapse it (divergence) if too large

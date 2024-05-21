@@ -40,6 +40,8 @@ class Deep(nn.Module):
 
         super(Deep, self).__init__()
 
+        self.name = 'Deep'
+
         layer_dim = int(input_dim/2)
 
         self.fc = nn.Linear(input_dim, layer_dim)
@@ -59,6 +61,8 @@ class AutoEncoder(nn.Module):
 
         super(AutoEncoder, self).__init__()
 
+        self.name = 'AutoEncoder'
+
         self.encoder = nn.Linear(input_dim, 1)
         self.decoder = nn.Linear(1, output_dim)
         
@@ -72,6 +76,25 @@ class AutoEncoder(nn.Module):
     @staticmethod
     def name():
         return 'autoencoder'
+    
+class Deep2(nn.Module):
+    def __init__(self,input_dim,output_dim,log = False):
+
+        super(Deep2, self).__init__()
+
+        self.name = 'Deep 2 HL'
+
+        self.fc = nn.Linear(input_dim, input_dim)
+        self.deep = Deep(input_dim=input_dim,output_dim=output_dim)
+        
+    def forward(self, x):
+        x = self.fc(x)
+        x = F.relu(x)
+        return self.deep(x)
+    
+    @staticmethod
+    def name():
+        return 'deep w/ 2 HL'
     
 def loadModelParams(model,file_name):
     path = f'./model_params/{file_name}.pt'

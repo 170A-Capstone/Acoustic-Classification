@@ -3,10 +3,11 @@ from utils.training_utils import Trainer
 from utils.evaluation_utils import Evaluator
 
 class GridSearch():
-    def __init__(self,epochs,train_data,test_data,log = False) -> None:
+    def __init__(self,feature_size,epochs,train_data,test_data,log = False) -> None:
         
         self.log = log
 
+        self.feature_size = feature_size
         self.epochs = epochs
         self.train_data = train_data
         self.test_data = test_data
@@ -18,12 +19,12 @@ class GridSearch():
 
         trainer = Trainer(model,lr=lr,momentum=momentum,log=False)
 
-        loss = trainer.training_epoch(epochs=self.epochs,trainloader=self.train_data)
+        accuracies = trainer.training_epoch(epochs=self.epochs,train_loader=self.train_data,val_loader=self.test_data)
         
-        evaluator = Evaluator(model,log=False)
-        accuracy = evaluator.evaluate(data_loader=self.test_data)
+        # evaluator = Evaluator(model,log=False)
+        # accuracy = evaluator.evaluate(data_loader=self.test_data)
 
-        return accuracy,loss
+        return accuracies
     
     def gridSearch(self,models,learning_rates,momenta):
 
@@ -41,13 +42,13 @@ class GridSearch():
 
                     print(f'[Grid Search] Model: {model.name()} | LR: {lr} | Momentum: {momentum}')
 
-                    model_instance = model(input_dim=6,output_dim=4,log=False)
+                    model_instance = model(input_dim=self.feature_size,output_dim=4,log=False)
 
-                    accuracy,loss = self.trainAndEvaluateModel(model_instance,lr,momentum)
+                    accuracy = self.trainAndEvaluateModel(model_instance,lr,momentum)
                     # print(accuracy)
 
-                    momentum_data = {'accuracy':accuracy,
-                            'loss':loss}
+                    momentum_data = {'accuracies':accuracy}
+                            # 'loss':loss}
                     
                     lr_data[str(momentum)] = momentum_data
 

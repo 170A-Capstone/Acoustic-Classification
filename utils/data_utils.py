@@ -193,6 +193,17 @@ class Dataset():
                 LEFT JOIN "{self.log_label}_features" AS features 
                 ON features.index = stat_features.index
                 '''
+        if feature_set_type == 'bs':
+            return f'''
+                SELECT stat_features.*,features.class 
+                FROM (
+                    SELECT index,mode_var 
+                    FROM "{self.log_label}_statistical_features"
+                ) AS stat_features 
+                LEFT JOIN "{self.log_label}_features" AS features 
+                ON features.index = stat_features.index
+                '''
+        
         
     def constructDataLoader(self,feature_set_type):
         
