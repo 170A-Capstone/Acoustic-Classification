@@ -55,28 +55,7 @@ class Deep(nn.Module):
     @staticmethod
     def name():
         return 'deep'
-    
-class AutoEncoder(nn.Module):
-    def __init__(self,input_dim,output_dim,log = False):
-
-        super(AutoEncoder, self).__init__()
-
-        self.name = 'AutoEncoder'
-
-        self.encoder = nn.Linear(input_dim, 1)
-        self.decoder = nn.Linear(1, output_dim)
-        
-    def forward(self, x):
-        x = self.encoder(x)
-        x = F.relu(x)
-        x = self.decoder(x)
-        x = F.sigmoid(x)
-        return x
-    
-    @staticmethod
-    def name():
-        return 'autoencoder'
-    
+  
 class Deep2(nn.Module):
     def __init__(self,input_dim,output_dim,log = False):
 
@@ -95,6 +74,54 @@ class Deep2(nn.Module):
     @staticmethod
     def name():
         return 'deep w/ 2 HL'
+      
+class AutoEncoder(nn.Module):
+    def __init__(self,input_dim,cl=1,ld=6,exponent=6,log = False):
+
+        super(AutoEncoder, self).__init__()
+
+        self.name = 'AutoEncoder'
+
+        self.input_dim=input_dim
+        self.ld=ld
+        self.cl=cl
+        self.exponent=exponent
+
+        self.generateCodingSeries()
+
+    def generateCodingSeries(self):
+        layer_dims = [self.calcLayerDim(i) for i in range(self.cl+1)]
+        self.encoder_series= nn.ModuleList([nn.Linear(i1,i2) for i1,i2 in zip(layer_dims[:3],layer_dims[1:])])
+        self.decoder_series = nn.ModuleList([nn.Linear(i1,i2) for i1,i2 in zip(layer_dims[::-1][:3],layer_dims[::-1][1:])])
+
+    def calcLayerDim(self,layer_index):
+        # https://www.desmos.com/calculator/hxtsqbd1oc
+        layer_dim = self.ld + (self.input_dim-self.ld)*((layer_index-self.cl)/self.cl)**self.exponent
+        return int(layer_dim)
+
+    def forward(self, x):
+
+        # encode
+        x = self.code(x,encode=True)
+            
+        # decode
+        x = self.code(x,encode=False)
+
+        return x
+    
+    def code(self,x,encode=True):
+        
+        series = self.encoder_series if encode else self.decoder_series
+        
+        for layer in series:
+            x = layer(x)
+            # x = F.relu(x)
+        
+        return x
+    
+    @staticmethod
+    def name():
+        return 'autoencoder'
     
 def loadModelParams(model,file_name):
     path = f'./model_params/{file_name}.pt'

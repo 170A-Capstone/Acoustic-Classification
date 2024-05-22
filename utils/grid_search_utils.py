@@ -1,6 +1,6 @@
 
 from utils.training_utils import Trainer
-from utils.evaluation_utils import Evaluator
+import json
 
 class GridSearch():
     def __init__(self,feature_size,epochs,train_data,test_data,log = False) -> None:
@@ -15,17 +15,6 @@ class GridSearch():
         if self.log:
             print('[Grid Search]: Grid Search initialized')
 
-    def trainAndEvaluateModel(self,model,lr,momentum):
-
-        trainer = Trainer(model,lr=lr,momentum=momentum,log=False)
-
-        accuracies = trainer.training_epoch(epochs=self.epochs,train_loader=self.train_data,val_loader=self.test_data)
-        
-        # evaluator = Evaluator(model,log=False)
-        # accuracy = evaluator.evaluate(data_loader=self.test_data)
-
-        return accuracies
-    
     def gridSearch(self,models,learning_rates,momenta):
 
         data = {}
@@ -44,10 +33,11 @@ class GridSearch():
 
                     model_instance = model(input_dim=self.feature_size,output_dim=4,log=False)
 
-                    accuracy = self.trainAndEvaluateModel(model_instance,lr,momentum)
-                    # print(accuracy)
+                    trainer = Trainer(model_instance,lr=lr,momentum=momentum,log=False)
 
-                    momentum_data = {'accuracies':accuracy}
+                    accuracies = trainer.training_epoch(epochs=self.epochs,train_loader=self.train_data,val_loader=self.test_data)
+
+                    momentum_data = {'accuracies':accuracies}
                             # 'loss':loss}
                     
                     lr_data[str(momentum)] = momentum_data
@@ -55,6 +45,44 @@ class GridSearch():
                 model_data[str(lr)] = lr_data
 
             data[f'{model.name()}'] = model_data
+            
+        return data
+    
+    def ae_gridSearch(self,ae_class,learning_rates,coding_layers,latent_dim):
+
+        data = {}
+
+        for lr in learning_rates:
+
+            lr_data = {}
+
+            for cl in coding_layers:
+
+                cl_data = {}
+
+                for ld in latent_dim:
+
+                    print(f'[AE Grid Search] LR: {lr} | Coding Layers: {cl} | Latent Dimensionality: {ld}')
+
+                    model_instance = ae_class(input_dim=self.feature_size,
+                                              cl=cl,
+                                              ld=ld)
+                    
+                    # print(model_instance.encoder_series[0])
+
+                    # return
+
+                    trainer = Trainer(model_instance,metric='loss',lr=lr,momentum=.9)
+
+                    losses = trainer.training_epoch(epochs=self.epochs,train_loader=self.train_data,val_loader=self.test_data)
+
+                    ld_data = {'losses':str(losses)}
+                    
+                    cl_data[str(ld)] = ld_data
+
+                lr_data[str(cl)] = cl_data
+
+            data[str(lr)] = lr_data
             
         return data
 

@@ -1,12 +1,16 @@
 from utils.data_utils import IDMT,MVD,IDMT_BG
+from utils.encoding_utils import IDMT_Encode
 
 def main():
 
-    idmt_bg = IDMT_BG()
-    idmt_bg.transformSignals(transform='harmonic')
+    # idmt_bg = IDMT_BG()
+    # idmt_bg.transformSignals(transform='harmonic')
 
-    idmt = IDMT()
-    idmt.transformSignals(transform='harmonic')
+    idmt = IDMT_Encode(params_path='',coding_layers=1,latent_dim=6)
+    idmt.transformSignals(transform='encode')
+
+    # idmt = IDMT()
+    # idmt.transformSignals(transform='harmonic')
 
     # mvd = MVD()
     # mvd.transformSignals(transform='statistical')

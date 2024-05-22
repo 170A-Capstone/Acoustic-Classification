@@ -2,12 +2,14 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 import time
+import numpy as np
 
 class Trainer():
-    def __init__(self,model,lr=0.001, momentum=0.9,log = False) -> None:
+    def __init__(self,model,lr=0.001, momentum=0.9,metric='accuracy',log = False) -> None:
         
         self.log = log
         self.model = model
+        self.metric = metric
 
         # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         # net.to(device)
@@ -51,15 +53,15 @@ class Trainer():
         return loss.item()
     
     def training_epoch(self,epochs,train_loader,val_loader):
-        accuracies = []
+        metrics = []
 
         if self.log:
             print(f'[Trainer]: Training on {len(train_loader)} data points')
 
-        # evaluate accuracy with no training
+        # evaluate metric with no training
         self.model.eval()
-        accuracy = self.evaluate(val_loader)
-        accuracies.append(accuracy)
+        metric = self.evaluate(val_loader)
+        metrics.append(metric)
 
         for epoch in range(epochs):
 
@@ -73,16 +75,22 @@ class Trainer():
 
             # evaluate
             self.model.eval()
-            accuracy = self.evaluate(val_loader)
-            accuracies.append(accuracy)
+            metric = self.evaluate(val_loader)
+            metrics.append(metric)
             
             if self.log:
                 b = time.time()
                 print(f'[Trainer]: Completed Epoch {epoch} ({b-a:.2f}s)')
 
-        return accuracies
+        return metrics
     
-    def evaluate(self,data_loader) -> float:
+    def evaluate(self,data_loader):
+        if self.metric == 'accuracy':
+            return self.evaluateAccuracy(data_loader)
+        if self.metric == 'loss':
+            return self.evaluateLoss(data_loader)
+    
+    def evaluateAccuracy(self,data_loader) -> float:
         """Measures accuracy of a model at the time of inference
 
         Returns:
@@ -124,6 +132,27 @@ class Trainer():
         #     print(f'[Evaluator]: Model Accuracy Evaluated ({b-a:.2f}s)')
 
         return accuracy
+
+    def evaluateLoss(self,data_loader):
+
+        losses = []
+
+        with torch.no_grad():
+            for inputs, labels in data_loader:
+            
+                inputs = torch.Tensor(inputs)
+                labels = torch.Tensor(labels)
+                
+
+                # forward pass
+                outputs = self.model(inputs)
+
+                # calculate baseline loss + modulated regularization value
+                loss = self.criterion(outputs, labels)
+
+                losses.append(loss)
+
+        return np.mean(losses)
 
     def storeParams(self,file_name):
         model_parameters = self.model.state_dict()

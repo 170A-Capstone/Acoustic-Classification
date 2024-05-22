@@ -4,6 +4,7 @@ import numpy as np
 from scipy.io import wavfile
 from sklearn.model_selection import train_test_split
 import numpy as np
+import torch
 
 
 from utils.sql_utils import DB
@@ -103,6 +104,7 @@ class Dataset():
         query_str = f'''
             SELECT signal 
             FROM "{self.log_label}_signals"
+            limit 10
             '''
 
         if self.log:
@@ -125,11 +127,10 @@ class Dataset():
 
         return data
   
-    def transformSignals(self,transform):
+    def getTransformUtils(self,transform):
 
         transform_func = None
         columns = []
-        table_name = f'{transform}_features'
 
         if transform == 'statistical':
             transform_func = sp.extractStatisticalFeatures
@@ -139,6 +140,13 @@ class Dataset():
             transform_func = sp.extractHarmonicFeatures
             columns = ['dominant_freq', 'dominant_amplitude', 'first_harmonic_freq']
 
+        return transform_func,columns
+
+    def transformSignals(self,transform):
+
+        transform_func,columns = self.getTransformUtils(transform)
+
+        table_name = f'{transform}_features'
 
         signals = self.downloadSignals()
 
@@ -146,6 +154,10 @@ class Dataset():
             a = time.time()
 
         transformed_signals = [transform_func(signal) for signal in signals]
+
+        print(transformed_signals)
+
+        return
 
         # FOR DEBUGGING
         # for index,signal in enumerate(signals):
@@ -236,6 +248,29 @@ class Dataset():
         
         return feature_size,train_data,test_data
     
+    def construct_ae_DataLoader(self):
+        data = IDMT().downloadSignals()
+
+        feature_size = len(data[0])
+
+        # fix length (some have length of 96000; wtf)
+        data = [d if len(d) == 96001 else np.concatenate((d,[0])) for d in data]
+
+        # for d in data:
+        #     print(len(d))
+
+        # convert to tensor
+        data = [torch.Tensor(np.array(d)) for d in data]
+
+        # zip with itself
+        data = [(d,d) for d in data]
+
+        # split
+        train_data, test_data = train_test_split(data, test_size=0.2)
+
+        return feature_size,train_data,test_data
+
+
 class IDMT(Dataset):
     def __init__(self,directory_path = "./IDMT_Traffic/audio/",log=True) -> None:
         super().__init__(directory_path,log)
