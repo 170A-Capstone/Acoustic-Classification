@@ -4,8 +4,10 @@ import pandas as pd
 from sklearn.datasets import load_iris
 
 def main():
-    data = load_iris()
-    print(data)
+    db = DB()
+    idmt_df = db.downloadDF('IDMT_statistical_features')
+
+    print(idmt_df.shape)
 
 if __name__ == '__main__':
     main()
