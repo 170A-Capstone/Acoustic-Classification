@@ -2,6 +2,7 @@ import os, time
 import pandas as pd
 import numpy as np
 from scipy.io import wavfile
+from scipy.signal import decimate
 from sklearn.model_selection import train_test_split
 import numpy as np
 import torch
@@ -99,12 +100,11 @@ class Dataset():
         embedding = [1 if class_ == class_label else 0 for class_ in self.classes]
         return embedding
 
-    def downloadSignals(self):
+    def downloadSignals(self,downsampled=True):
 
         query_str = f'''
             SELECT signal 
-            FROM "{self.log_label}_signals"
-            limit 10
+            FROM "{self.log_label+('_downsampled'if downsampled else '')}_signals"
             '''
 
         if self.log:
@@ -142,6 +142,28 @@ class Dataset():
 
         return transform_func,columns
 
+    def downsampleSignals(self,order=2**4):
+        
+        signals = self.downloadSignals(downsampled=False)
+        
+        if self.log:
+            a = time.time()
+
+        downsampled_signals = [decimate(signal,order) for signal in signals]
+        
+        if self.log:
+            b = time.time()
+            print(f'[{self.log_label}]: Signals Downsampled ({b-a:.2f}s)')
+
+        self.db.uploadBLObs(downsampled_signals,f'{self.log_label}_downsampled_signals')
+        
+        if self.log:
+            c = time.time()
+            print(f'[{self.log_label}]: Signals Uploaded ({c-b:.2f}s)')
+
+            
+    
+
     def transformSignals(self,transform):
 
         transform_func,columns = self.getTransformUtils(transform)
@@ -154,10 +176,6 @@ class Dataset():
             a = time.time()
 
         transformed_signals = [transform_func(signal) for signal in signals]
-
-        print(transformed_signals)
-
-        return
 
         # FOR DEBUGGING
         # for index,signal in enumerate(signals):
@@ -249,18 +267,20 @@ class Dataset():
         return feature_size,train_data,test_data
     
     def construct_ae_DataLoader(self):
-        data = IDMT().downloadSignals()
-
-        feature_size = len(data[0])
+        data = self.downloadSignals()
 
         # fix length (some have length of 96000; wtf)
-        data = [d if len(d) == 96001 else np.concatenate((d,[0])) for d in data]
+        data = [d if len(d) == 6001 else np.concatenate((d,[0])) for d in data]
 
         # for d in data:
         #     print(len(d))
 
+        # data = [decimate(d, 2**4) for d in data]
+
+        feature_size = len(data[0])
+
         # convert to tensor
-        data = [torch.Tensor(np.array(d)) for d in data]
+        data = [torch.reshape(torch.Tensor(np.array(d)),shape=(1,feature_size,1)) for d in data]
 
         # zip with itself
         data = [(d,d) for d in data]

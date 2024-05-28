@@ -113,15 +113,82 @@ class AutoEncoder(nn.Module):
         
         series = self.encoder_series if encode else self.decoder_series
         
-        for layer in series:
+        for i,layer in enumerate(series):
             x = layer(x)
-            # x = F.relu(x)
+            if i != len(series)-1:
+                x = F.relu(x)
         
         return x
     
     @staticmethod
     def name():
         return 'autoencoder'
+      
+class ConvolutionalAutoEncoder(nn.Module):
+    def __init__(self,input_dim,cl=1,ld=6,exponent=6,log = False):
+
+        super(ConvolutionalAutoEncoder, self).__init__()
+
+        self.name = 'ConvolutionalAutoEncoder'
+
+        self.input_dim=input_dim
+        self.kernel_size=1
+        self.ld=ld
+        self.cl=cl
+        self.exponent=exponent
+
+        layer_dims = [self.calcLayerDim(i) for i in range(self.cl+1)]
+        self.encoder_convs,self.encoder_batches = self.generateCodingBlocks(layer_dims,encode=True)
+        self.decoder_convs,self.decoder_batches = self.generateCodingBlocks(layer_dims,encode=False)
+
+    def generateCodingBlocks(self,layer_dims,encode):
+        if not encode:
+            layer_dims = layer_dims[::-1]
+
+        convs = nn.ModuleList([nn.Conv1d(i1,i2,self.kernel_size) for i1,i2 in zip(layer_dims[:3],layer_dims[1:])])
+        # batches = nn.ModuleList([nn.BatchNorm1d(i) for i in layer_dims[1:]])
+        batches = None
+
+        return convs,batches
+
+    def calcLayerDim(self,layer_index):
+        # https://www.desmos.com/calculator/hxtsqbd1oc
+        layer_dim = self.ld + (self.input_dim-self.ld)*((layer_index-self.cl)/self.cl)**self.exponent
+        return int(layer_dim)
+
+    def forward(self, x):
+
+        # encode
+        x = self.code(x,encode=True)
+            
+        # decode
+        x = self.code(x,encode=False)
+
+        return x
+    
+    def code(self,x,encode=True):
+        
+        convs = self.encoder_convs if encode else self.decoder_convs
+        # batches = self.encoder_batches if encode else self.decoder_batches
+        
+        for i in range(self.cl):
+            x = convs[i](x)
+            # x = batches[i](x)
+            
+            if not encode and i == self.cl-1:
+                x = F.sigmoid(x)
+            else:
+                x = F.relu(x)
+        
+        return x
+    
+    def get_params(self):
+        # return [p for p in self.parameters()][1:-2]
+        return [p for p in self.parameters()][1:2]
+    
+    @staticmethod
+    def name():
+        return 'convolutional-autoencoder'
     
 def loadModelParams(model,file_name):
     path = f'./model_params/{file_name}.pt'

@@ -101,6 +101,8 @@ class DB():
         # upload audio waveforms as BLObs with corresponding identifier (index)
         for index,signal in enumerate(signals):
 
+            signal = np.ascontiguousarray(signal)
+
             # convert audio to BLOb
             blob = psycopg2.Binary(signal)
 

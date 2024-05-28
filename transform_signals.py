@@ -6,13 +6,14 @@ def main():
     # idmt_bg = IDMT_BG()
     # idmt_bg.transformSignals(transform='harmonic')
 
-    idmt = IDMT_Encode(params_path='',coding_layers=1,latent_dim=6)
-    idmt.transformSignals(transform='encode')
+    # idmt = IDMT_Encode(params_path='',coding_layers=1,latent_dim=6)
+    # idmt.transformSignals(transform='downsample')
 
-    # idmt = IDMT()
-    # idmt.transformSignals(transform='harmonic')
+    idmt = IDMT()
+    idmt.downsampleSignals()
 
-    # mvd = MVD()
+    mvd = MVD()
+    mvd.downsampleSignals()
     # mvd.transformSignals(transform='statistical')
 
 if __name__ == '__main__':

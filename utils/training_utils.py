@@ -17,7 +17,7 @@ class Trainer():
         # baseline loss function
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
-
+    
         self.optimizer = optim.SGD(self.model.parameters(), lr=lr)
         # self.optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 

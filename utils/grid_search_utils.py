@@ -1,6 +1,6 @@
 
 from utils.training_utils import Trainer
-import json
+import time
 
 class GridSearch():
     def __init__(self,feature_size,epochs,train_data,test_data,log = False) -> None:
@@ -50,6 +50,8 @@ class GridSearch():
     
     def ae_gridSearch(self,ae_class,learning_rates,coding_layers,latent_dim):
 
+        print('[AE Grid Search] Beginning Grid Search')
+
         data = {}
 
         for lr in learning_rates:
@@ -62,7 +64,7 @@ class GridSearch():
 
                 for ld in latent_dim:
 
-                    print(f'[AE Grid Search] LR: {lr} | Coding Layers: {cl} | Latent Dimensionality: {ld}')
+                    a = time.time()
 
                     model_instance = ae_class(input_dim=self.feature_size,
                                               cl=cl,
@@ -75,6 +77,10 @@ class GridSearch():
                     trainer = Trainer(model_instance,metric='loss',lr=lr,momentum=.9)
 
                     losses = trainer.training_epoch(epochs=self.epochs,train_loader=self.train_data,val_loader=self.test_data)
+
+                    b = time.time()
+
+                    print(f'[AE Grid Search] LR: {lr} | Coding Layers: {cl} | Latent Dimensionality: {ld} ({b-a:.2f}s)')
 
                     ld_data = {'losses':str(losses)}
                     
