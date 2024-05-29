@@ -1,46 +1,33 @@
-# from model import Net
-from models.nn import Shallow
-from utils.data_utils import IDMT,MVD,IDMT_BG
+from models.nn import ConvolutionalAutoEncoder
+from utils.data_utils import IDMT
 from utils.training_utils import Trainer
-from utils.evaluation_utils import Evaluator
 
 def main():
 
-    # idmt_bg = IDMT_BG()
-    # feature_size,trainloader = idmt_bg.constructDataLoader()
+    coding_layers = 2
+    latent_dim = 8
 
-    # idmt = IDMT()
-    # trainloader = idmt.constructDataLoader()
+    learning_rate = 10e-1
+    epochs = 5
 
-    # mvd = MVD()
-    # trainloader = mvd.constructDataLoader()
+    # trainloader
+    feature_size,train_data,test_data = IDMT().construct_ae_DataLoader()
 
-    feature_size,train_data,test_data = MVD().constructDataLoader(feature_set_type='statistical-PCA')
-
-    model = Shallow(input_dim=feature_size,output_dim=4)
-
-    trainer = Trainer(model,lr=10e-1,momentum=.9,log=False)
-
-    accuracies = trainer.training_epoch(epochs=5,train_loader=train_data,val_loader=test_data)
-
-    print(accuracies)
+    print(feature_size)
 
     return
 
+    model_instance = ConvolutionalAutoEncoder(input_dim=feature_size,
+                                cl=coding_layers,
+                                ld=latent_dim)
+    
+    trainer = Trainer(model_instance,metric='loss',lr=learning_rate,momentum=.9)
 
-    # !! BE VERY CONSCIOUS OF LEARNING RATE !!
-    # can either stop learning completely if too small or collapse it (divergence) if too large
-    trainer = Trainer(model,log=True,lr=10e-5)
+    losses = trainer.training_epoch(epochs=epochs,train_loader=train_data,val_loader=test_data)
 
-    losses = trainer.training_epoch(epochs=1,trainloader=trainloader)
+    print(losses)
 
-    # print(losses[0],losses[-1])
-
-    trainer.storeParams(file_name='signal_detection_from_harmonics')
-
-    # evaluator = Evaluator(trainer.model)
-    # accuracy = evaluator.evaluate(trainloader)
-    # print(f'Accuracy: {accuracy}')
+    trainer.storeParams(file_name='cae')
 
 if __name__ == '__main__':
 

@@ -1,5 +1,5 @@
 from utils.data_utils import Dataset,IDMT
-from models.nn import AutoEncoder,loadModelParams
+from models.nn import ConvolutionalAutoEncoder,loadModelParams
 
 import torch
 import numpy as np
@@ -9,23 +9,28 @@ class IDMT_Encode(IDMT):
         super().__init__()
 
         self.latent_dim = latent_dim
+        self.feature_size = 6001
 
-        self.ae = AutoEncoder(input_dim=96001,cl=coding_layers,ld=latent_dim)
+        self.cae = ConvolutionalAutoEncoder(input_dim=self.feature_size,cl=coding_layers,ld=latent_dim)
 
         # which one?
         # loadModelParams(model,file_name)
-        # self.ae = loadModelParams(self.ae,params_path)
+        self.cae = loadModelParams(self.cae,params_path)
 
     def encode(self,signal):
 
-        if len(signal) != 96001:
+        if len(signal) != self.feature_size:
             signal = np.concatenate((signal,[0]))
-        
+
         signal = torch.Tensor(np.array(signal))
 
-        features = self.ae.code(signal,encode=True)
+        signal = torch.reshape(signal,shape=(1,self.feature_size,1))
+
+        features = self.cae.code(signal,encode=True)
+
+        features = torch.reshape(features,shape=(1,self.latent_dim))
         
-        return features.detach().numpy().tolist()
+        return features.detach().numpy().tolist()[0]
 
     def getTransformUtils(self,transform):
 
@@ -34,7 +39,7 @@ class IDMT_Encode(IDMT):
 
         if transform == 'encode':
             transform_func = self.encode
-            columns = [f'param{i}' for i in range(self.latent_dim)]
+            columns = [f'v{i}' for i in range(self.latent_dim)]
         else:
             transform_func,columns = super().getTransformUtils(transform)
 
