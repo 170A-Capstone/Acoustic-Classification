@@ -25,7 +25,7 @@ def svm_model():
     X_test_scaled = scaler.transform(X_test)
 
     # Create and train the SVM model
-    svm_model = SVC(kernel='rbf')  # 'rbf' is good for non-linear problems, change as needed
+    svm_model = SVC(kernel='poly', C = 100, degree=3, gamma='scale')  # 'rbf' is good for non-linear problems, change as needed
     svm_model.fit(X_train_scaled, y_train)
 
     # Make predictions
