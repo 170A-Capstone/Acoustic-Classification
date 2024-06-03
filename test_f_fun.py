@@ -3,7 +3,7 @@ from utils.sql_utils import DB
 def main():
     db = DB(log=True)
     
-    df = db.downloadDF('IDMT_statistical_features')
+    df = db.downloadDF('MVD_statistical_features')
 
     print(df.head())
 

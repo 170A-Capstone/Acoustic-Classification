@@ -9,7 +9,7 @@ def knn_model():
     idmt_df = db.downloadDF('IDMT_statistical_features')
     mvd_df = db.downloadDF('MVD_statistical_features')
     df = pd.concat([idmt_df, mvd_df], ignore_index=True)
-    X = df[['mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance', 'std', 'gstd_var', 'ent']]  # Features
+    X = df[['mode_var', 's', 'g', 'variance', 'gstd_var', 'ent', 'fc', 'azcr']]  # Features
 
     idmt_df = db.downloadDF('IDMT_features')
     mvd_df = db.downloadDF('MVD_features')

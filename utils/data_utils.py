@@ -130,7 +130,7 @@ class Dataset():
 
         if transform == 'statistical':
             transform_func = sp.extractStatisticalFeatures
-            columns = ['mode_var','k','s','mean','i','g','h','dev','var','variance','std','gstd_var','ent']
+            columns = ['mode_var','k','s','mean','i','g','h','dev','var','variance','std','gstd_var','ent', 'fc', 'azcr']
 
         elif transform == 'harmonic':
             transform_func = sp.extractHarmonicFeatures
