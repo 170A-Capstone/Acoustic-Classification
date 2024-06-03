@@ -11,11 +11,13 @@ def main():
     idmt.uploadFeatures()
     idmt.uploadSignals()
     idmt.transformSignals('statistical')
+    idmt.transformSignals('librosa')
     
     mvd = MVD(db,log=True)
     mvd.uploadFeatures()
     mvd.uploadSignals()
     mvd.transformSignals('statistical')
+    mvd.transformSignals('librosa')
 
 if __name__ == '__main__':
     main()

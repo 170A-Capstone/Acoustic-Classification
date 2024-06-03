@@ -7,11 +7,15 @@ import utils.signal_processing_utils as sp
 
 import utils.data_visualization_utils as dv
 
+from utils.sql_utils import DB
+
+db = DB()
+
 class Dataset():
     """Utilities for handling dataset
     """
 
-    def __init__(self,db,directory_path,log=True) -> None:
+    def __init__(self,directory_path,log=True) -> None:
         
         self.db = db
         self.directory_path = directory_path
@@ -131,6 +135,10 @@ class Dataset():
             transform_func = sp.extractStatisticalFeatures
             columns = ['mode_var','k','s','mean','i','g','h','dev','var','variance','std','gstd_var','ent']
             table_name = 'statistical_features'
+        elif transform == 'librosa':
+            transform_func = sp.librosaextractFeatures
+            columns = ['frequency_coefficients', 'short_time_energy', 'average_zero_cross_rate']#], 'pitch_frequency']
+            table_name = 'librosa_features'
 
         signals = self.downloadSignals()
 
@@ -169,10 +177,10 @@ class Dataset():
             plot_func = dv.PCA_analysis
         
         query_str = f'''
-            SELECT stat_features.*,features.* 
+            SELECT stat_features.*,features.*, frequency_coefficients as fc, short_time_energy as ste, average_zero_cross_rate as azcr
             FROM "{self.log_label}_statistical_features" AS stat_features 
-            LEFT JOIN "{self.log_label}_features" AS features 
-            ON features.index = stat_features.index
+            LEFT JOIN "{self.log_label}_features" AS features ON features.index = stat_features.index
+            LEFT JOIN "{self.log_label}_librosa_features" AS librosa_features ON librosa_features.index = stat_features.index
             '''
         
         if self.log:
@@ -183,14 +191,15 @@ class Dataset():
         if self.log_label == "IDMT":
             feature_columns = ['index', 'mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance',
                            'std', 'gstd_var', 'ent', 'index', 'date', 'location', 'speed', 'position', 'daytime',
-                           'weather', 'class', 'source direction', 'mic', 'channel']
+                           'weather', 'class', 'source direction', 'mic', 'channel', 'fc', 'ste', 'azcr']
             data = self.db.cursor.fetchall()
             df = pd.DataFrame(data, columns=feature_columns)
             df = df.drop(columns="index")
             df = df.drop(columns="position")
+            print(df.columns)
         elif self.log_label == "MVD" or self.log_label=="PCA":
             feature_columns = ['index', 'mode_var', 'k', 's', 'mean', 'i', 'g', 'h', 'dev', 'var', 'variance',
-                           'std', 'gstd_var', 'ent', 'index', 'record_num', 'mic', 'class']
+                           'std', 'gstd_var', 'ent', 'index', 'record_num', 'mic', 'class', 'fc', 'ste', 'azcr']
             data = self.db.cursor.fetchall()
             df = pd.DataFrame(data, columns=feature_columns)
             df = df.drop(columns="index")
