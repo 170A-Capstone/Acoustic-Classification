@@ -23,7 +23,7 @@ def rf_model():
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    rf = RandomForestClassifier(n_estimators=100, max_depth=20, min_samples_split=10)
+    rf = RandomForestClassifier(n_estimators=30, max_depth=13, min_samples_split=10, criterion='entropy')
     rf.fit(X_train_scaled, y_train)
 
     y_pred = rf.predict(X_test_scaled)
