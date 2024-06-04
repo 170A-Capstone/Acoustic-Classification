@@ -26,7 +26,7 @@ def main():
     #print(cm)
     cm_rf = cm_rf.astype('float') / cm_rf.sum(axis=1)[:, np.newaxis]
     #print(cm_normalized)
-    plot_confusion_matrix(cm_rf, title='Confusion Matrix for KNN', class_names=class_names)
+    plot_confusion_matrix(cm_rf, title='Confusion Matrix for Random Forest', class_names=class_names)
     
 if __name__ == '__main__':
     main()
